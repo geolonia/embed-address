@@ -84,6 +84,10 @@ $(document).ready(() => {
   });
 
   $button.on("click", () => {
+    $prefectureSelect.val("");
+    $citySelect.val("");
+    $smallAreaSelect.val("");
+    $postalCodeInput.val("");
     $geolocationLoader.css("display", "inline-block");
     window.navigator.geolocation.getCurrentPosition(
       (position) => {

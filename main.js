@@ -1,10 +1,14 @@
 $(document).ready(() => {
   const $button = $("#geolocate");
+  const $geolocationLoader = $("#geolocation-loader");
+  const $otherAddressesLoader = $("#other-addresses-loader");
   const $postalCodeInput = $("#postal-code");
   const $prefectureSelect = $("#prefecture");
   const $citySelect = $("#city");
   const $smallAreaSelect = $("#small-area");
   const $otherAddressesInput = $("#other-addresses");
+
+  $('[data-toggle="tooltip"]').tooltip();
 
   const initPrefecture = () => {
     $prefectureSelect.empty();
@@ -80,6 +84,7 @@ $(document).ready(() => {
   });
 
   $button.on("click", () => {
+    $geolocationLoader.css("display", "inline-block");
     window.navigator.geolocation.getCurrentPosition(
       (position) => {
         // const latitude = position.coords.latitude;
@@ -90,24 +95,24 @@ $(document).ready(() => {
           $smallAreaSelect.val("37000010");
           $postalCodeInput.val("521-0307");
           $otherAddressesInput.focus();
+          $geolocationLoader.css("display", "none");
         });
       },
       () => {}
     );
   });
 
-  $status = $("<span />");
-
-  $otherAddressesInput.on("focus", (event) => {
-    $status.remove();
+  let prevValue = "";
+  $otherAddressesInput.on("change", () => {
+    $otherAddressesLoader.css("display", "none");
   });
   $otherAddressesInput.on("blur", (event) => {
     const value = event.target.value;
-    if (value) {
-      $status.text("送信中");
-      $otherAddressesInput.after($status);
+    if (value && prevValue !== value) {
+      prevValue = value;
+      $otherAddressesLoader.css("display", "inline-block");
       setTimeout(() => {
-        $status.text("送信しました");
+        $otherAddressesLoader.css("display", "none");
       }, 2000);
     }
   });

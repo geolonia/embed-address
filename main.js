@@ -2,7 +2,6 @@ $(document).ready(() => {
   const $button = $("#geolocate");
   const $geolocationLoader = $("#geolocation-loader");
   const $otherAddressesLoader = $("#other-addresses-loader");
-  const $postalCodeInput = $("#postal-code");
   const $prefectureSelect = $("#prefecture");
   const $citySelect = $("#city");
   const $smallAreaSelect = $("#small-area");
@@ -87,7 +86,6 @@ $(document).ready(() => {
     $prefectureSelect.val("");
     $citySelect.val("");
     $smallAreaSelect.val("");
-    $postalCodeInput.val("");
     $geolocationLoader.css("display", "inline-block");
     window.navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -97,7 +95,6 @@ $(document).ready(() => {
           $prefectureSelect.val("25");
           $citySelect.val("25214");
           $smallAreaSelect.val("37000010");
-          $postalCodeInput.val("521-0307");
           $otherAddressesInput.focus();
           $geolocationLoader.css("display", "none");
         });

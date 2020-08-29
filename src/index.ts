@@ -4,7 +4,7 @@ declare global {
   }
 }
 
-import { renderControls } from "./ui";
+import { renderSelect } from "./ui";
 
 const APIBase = "https://cdn.geolonia.com/address";
 
@@ -12,14 +12,16 @@ const APIBase = "https://cdn.geolonia.com/address";
  *
  * @param {string} path path for the Address API
  */
-const fetchAPI = async (path: string) => {
+const fetchAPI = async <T = any>(path: string) => {
   try {
     const data = await fetch(`${APIBase}/${path}`).then((res) => {
       if (res.status > 299) {
         throw new Error("request error");
+      } else {
+        return res.json();
       }
     });
-    return data;
+    return data as T;
   } catch (error) {
     throw error;
   }
@@ -32,17 +34,55 @@ const showError = (message: string) => {
 const main = async () => {
   const prefs = [];
   try {
-    prefs.push(await fetchAPI("japan.json"));
+    const body = await fetchAPI<Geolonia.Pref[]>("japan.json");
+    prefs.push(...body);
   } catch (error) {
     showError(error.message);
     return;
   }
 
+  let selectPref: HTMLSelectElement;
   try {
-    await renderControls();
+    selectPref = renderSelect();
   } catch (error) {
     showError(error.message);
+    return;
   }
+
+  prefs.forEach((pref) => {
+    const option = document.createElement("option");
+    option.value = pref.都道府県コード;
+    option.innerText = pref.都道府県名;
+    selectPref.appendChild(option);
+  });
+
+  selectPref.addEventListener("change", async (event) => {
+    if (event.target instanceof HTMLSelectElement) {
+      const prefCode = event.target.value;
+      const cities = [];
+      try {
+        const body = await fetchAPI<Geolonia.City[]>(`japan/${prefCode}.json`);
+        cities.push(...body);
+      } catch (error) {
+        showError(error.message);
+        return;
+      }
+      let selectCity: HTMLSelectElement;
+      try {
+        selectCity = renderSelect();
+      } catch (error) {
+        showError(error.message);
+        return;
+      }
+
+      cities.forEach((city) => {
+        const option = document.createElement("option");
+        option.value = city.市区町村コード;
+        option.innerText = city.市区町村名;
+        selectCity.appendChild(option);
+      });
+    }
+  });
 };
 
 main();

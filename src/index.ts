@@ -4,9 +4,11 @@ declare global {
   }
 }
 
-import { renderSelect } from "./ui";
+import { renderSelect, removeSelect } from "./ui";
 
-const APIBase = "https://cdn.geolonia.com/address";
+const APIBase =
+  "https://cdn.geolonia.com/address" &&
+  "https://deploy-preview-4--awesome-jepsen-b8a456.netlify.app/address";
 
 /**
  *
@@ -42,8 +44,11 @@ const main = async () => {
   }
 
   let selectPref: HTMLSelectElement;
+  let selectCity: HTMLSelectElement;
+  let selectSmallArea: HTMLSelectElement;
+
   try {
-    selectPref = renderSelect();
+    selectPref = renderSelect("prefecture", "都道府県");
   } catch (error) {
     showError(error.message);
     return;
@@ -55,21 +60,27 @@ const main = async () => {
     option.innerText = pref.都道府県名;
     selectPref.appendChild(option);
   });
+  selectPref.disabled = false;
 
   selectPref.addEventListener("change", async (event) => {
     if (event.target instanceof HTMLSelectElement) {
+      if (selectCity) {
+        removeSelect(selectCity);
+      }
+      if (selectSmallArea) {
+        removeSelect(selectSmallArea, true);
+      }
+      try {
+        selectCity = renderSelect("city", "市区町村");
+      } catch (error) {
+        showError(error.message);
+        return;
+      }
       const prefCode = event.target.value;
       const cities = [];
       try {
         const body = await fetchAPI<Geolonia.City[]>(`japan/${prefCode}.json`);
         cities.push(...body);
-      } catch (error) {
-        showError(error.message);
-        return;
-      }
-      let selectCity: HTMLSelectElement;
-      try {
-        selectCity = renderSelect();
       } catch (error) {
         showError(error.message);
         return;
@@ -81,137 +92,42 @@ const main = async () => {
         option.innerText = city.市区町村名;
         selectCity.appendChild(option);
       });
+      selectCity.disabled = false;
+
+      selectCity.addEventListener("change", async (event) => {
+        if (event.target instanceof HTMLSelectElement) {
+          if (selectSmallArea) {
+            removeSelect(selectSmallArea);
+          }
+          try {
+            selectSmallArea = renderSelect("small-area", "大字町丁目");
+          } catch (error) {
+            showError(error.message);
+            return;
+          }
+          const cityCode = event.target.value;
+          const smallAreas = [];
+          try {
+            const body = await fetchAPI<Geolonia.SmallArea[]>(
+              `japan/${prefCode}/${cityCode}.json`
+            );
+            smallAreas.push(...body);
+          } catch (error) {
+            showError(error.message);
+            return;
+          }
+
+          smallAreas.forEach((smallArea) => {
+            const option = document.createElement("option");
+            option.value = smallArea.大字町丁目コード;
+            option.innerText = smallArea.大字町丁目名;
+            selectSmallArea.appendChild(option);
+          });
+          selectSmallArea.disabled = false;
+        }
+      });
     }
   });
 };
 
 main();
-
-// // TODO
-// // 1. 都道府県を fetch
-// // 1. 1つ目の都道府県 select を render
-// // 1. ユーザーが select する
-// // 1. 市区町村を fetch
-// // 1. 2つ目の市区町村 select を render
-// // 1. ユーザーが 市区町村を select
-
-// // $(document).ready(() => {
-// //   const $button = $("#geolocate");
-// //   const $geolocationLoader = $("#geolocation-loader");
-// //   const $otherAddressesLoader = $("#other-addresses-loader");
-// //   const $prefectureSelect = $("#prefecture");
-// //   const $citySelect = $("#city");
-// //   const $smallAreaSelect = $("#small-area");
-// //   const $otherAddressesInput = $("#other-addresses");
-
-// //   $('[data-toggle="tooltip"]').tooltip();
-
-// //   const initPrefecture = () => {
-// //     $prefectureSelect.empty();
-// //     $prefectureSelect.append('<option value=""></option>');
-// //   };
-// //   const initCity = () => {
-// //     $citySelect.empty();
-// //     $citySelect.append('<option value=""></option>');
-// //   };
-// //   const initSmallArea = () => {
-// //     $smallAreaSelect.empty();
-// //     $smallAreaSelect.append('<option value=""></option>');
-// //   };
-
-// //   const fetchCities = (prefCode) => {
-// //     initCity();
-// //     return fetch(`./data/cities/${prefCode}.json`)
-// //       .then((res) => res.json())
-// //       .then((items) => {
-// //         items.forEach((item) => {
-// //           $citySelect.append(
-// //             `<option value="${item.cityCode}">${item.name}</option>`
-// //           );
-// //         });
-// //       });
-// //   };
-// //   const fetchSmallAreas = (cityCode) => {
-// //     initSmallArea();
-// //     return fetch(`./data/smallAreas/${cityCode}.json`)
-// //       .then((res) => res.json())
-// //       .then((items) => {
-// //         const names = items.map((item) => item.name);
-// //         const uniqueAreas = names.reduce((prev, name, index) => {
-// //           if (names.indexOf(name) === index) {
-// //             prev.push(items[index]);
-// //           }
-// //           return prev;
-// //         }, []);
-// //         uniqueAreas.forEach((item) => {
-// //           $smallAreaSelect.append(
-// //             `<option value="${item.smallAreaCode}">${item.name}</option>`
-// //           );
-// //         });
-// //       });
-// //   };
-
-// //   initPrefecture();
-// //   initCity();
-// //   initSmallArea();
-
-// //   fetch("./data/prefectures.json")
-// //     .then((res) => res.json())
-// //     .then((items) => {
-// //       items.forEach((item) => {
-// //         $prefectureSelect.append(
-// //           `<option value="${item.prefCode}">${item.name}</option>`
-// //         );
-// //       });
-// //     });
-
-// //   $prefectureSelect.on("change", (event) => {
-// //     const prefCode = event.target.value;
-// //     if (prefCode) {
-// //       fetchCities(prefCode);
-// //     }
-// //   });
-
-// //   $citySelect.on("change", (event) => {
-// //     const cityCode = event.target.value;
-// //     if (cityCode) {
-// //       fetchSmallAreas(cityCode);
-// //     }
-// //   });
-
-// //   $button.on("click", () => {
-// //     $prefectureSelect.val("");
-// //     $citySelect.val("");
-// //     $smallAreaSelect.val("");
-// //     $geolocationLoader.css("display", "inline-block");
-// //     window.navigator.geolocation.getCurrentPosition(
-// //       (position) => {
-// //         // const latitude = position.coords.latitude;
-// //         // const longitude = position.coords.longitude;
-// //         Promise.all([fetchCities("25"), fetchSmallAreas("25214")]).then(() => {
-// //           $prefectureSelect.val("25");
-// //           $citySelect.val("25214");
-// //           $smallAreaSelect.val("37000010");
-// //           $otherAddressesInput.focus();
-// //           $geolocationLoader.css("display", "none");
-// //         });
-// //       },
-// //       () => {}
-// //     );
-// //   });
-
-// //   let prevValue = "";
-// //   $otherAddressesInput.on("change", () => {
-// //     $otherAddressesLoader.css("display", "none");
-// //   });
-// //   $otherAddressesInput.on("blur", (event) => {
-// //     const value = event.target.value;
-// //     if (value && prevValue !== value) {
-// //       prevValue = value;
-// //       $otherAddressesLoader.css("display", "inline-block");
-// //       setTimeout(() => {
-// //         $otherAddressesLoader.css("display", "none");
-// //       }, 2000);
-// //     }
-// //   });
-// // });

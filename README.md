@@ -1,3 +1,1 @@
-# prototype-address-input-support
-
-https://geolonia.github.io/prototype-address-input-support/
+# 住所簡単入力 API

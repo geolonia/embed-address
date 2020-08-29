@@ -1,0 +1,31 @@
+{
+  "name": "prototype-address-input-support",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "webpack-dev-server",
+    "build": "webpack -p",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/geolonia/prototype-address-input-support.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/geolonia/prototype-address-input-support/issues"
+  },
+  "homepage": "https://github.com/geolonia/prototype-address-input-support#readme",
+  "devDependencies": {
+    "@types/html-webpack-plugin": "^3.2.3",
+    "html-webpack-plugin": "^4.3.0",
+    "ts-loader": "^8.0.3",
+    "typescript": "^4.0.2",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  }
+}

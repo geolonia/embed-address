@@ -2,6 +2,10 @@ import "./style.scss";
 
 export const decorateTarget = (target: HTMLElement) => {
   target.className += " geolonia_address_target";
+  const container = document.createElement("div");
+  container.className = "container";
+  target.appendChild(container);
+  return container;
 };
 
 export const renderHiddenInput = (target: HTMLElement) => {

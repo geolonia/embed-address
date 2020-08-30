@@ -35,12 +35,12 @@ const showError = (message: string) => {
 };
 
 const main = async (targetElementId: string = "address") => {
-  const target = document.getElementById(targetElementId);
+  let target = document.getElementById(targetElementId);
   if (!target) {
     throw new Error("no target found.");
   }
 
-  decorateTarget(target);
+  target = decorateTarget(target);
   const hiddenInput = renderHiddenInput(target);
 
   const prefs = await fetchItems<Geolonia.Pref>("japan.json");

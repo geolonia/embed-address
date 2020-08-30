@@ -1,4 +1,5 @@
 import {
+  decorateTarget,
   renderHiddenInput,
   renderSelect,
   removeSelect,
@@ -24,7 +25,7 @@ const fetchItems = async <T>(path: string) => {
     });
     return data as T[];
   } catch (error) {
-    showError(error.message);
+    console.log(error);
     return [];
   }
 };
@@ -39,6 +40,7 @@ const main = async (targetElementId: string = "address") => {
     throw new Error("no target found.");
   }
 
+  decorateTarget(target);
   const hiddenInput = renderHiddenInput(target);
 
   const prefs = await fetchItems<Geolonia.Pref>("japan.json");
@@ -52,10 +54,10 @@ const main = async (targetElementId: string = "address") => {
   selectPref.addEventListener("change", async (event) => {
     if (event.target instanceof HTMLSelectElement) {
       if (selectCity) {
-        removeSelect(selectCity);
+        removeSelect("city_code");
       }
       if (selectSmallArea) {
-        removeSelect(selectSmallArea, true);
+        removeSelect("small_area_code");
       }
       selectCity = renderSelect(target, "city_code", "市区町村");
 
@@ -72,7 +74,7 @@ const main = async (targetElementId: string = "address") => {
       selectCity.addEventListener("change", async (event) => {
         if (event.target instanceof HTMLSelectElement) {
           if (selectSmallArea) {
-            removeSelect(selectSmallArea);
+            removeSelect("small_area_code");
           }
           selectSmallArea = renderSelect(
             target,

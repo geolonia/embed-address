@@ -4,7 +4,7 @@ declare global {
   }
 }
 
-import { renderSelect, removeSelect } from "./ui";
+import { renderHiddenInput, renderSelect, removeSelect } from "./ui";
 
 const APIBase =
   "https://cdn.geolonia.com/address" &&
@@ -34,7 +34,9 @@ const showError = (message: string) => {
 };
 
 const main = async () => {
-  const prefs = [];
+  const hiddenInput = renderHiddenInput();
+
+  const prefs: Geolonia.Pref[] = [];
   try {
     const body = await fetchAPI<Geolonia.Pref[]>("japan.json");
     prefs.push(...body);
@@ -48,7 +50,7 @@ const main = async () => {
   let selectSmallArea: HTMLSelectElement;
 
   try {
-    selectPref = renderSelect("prefecture", "都道府県");
+    selectPref = renderSelect("pref_code", "都道府県");
   } catch (error) {
     showError(error.message);
     return;
@@ -71,13 +73,18 @@ const main = async () => {
         removeSelect(selectSmallArea, true);
       }
       try {
-        selectCity = renderSelect("city", "市区町村");
+        selectCity = renderSelect("city_code", "市区町村");
       } catch (error) {
         showError(error.message);
         return;
       }
       const prefCode = event.target.value;
-      const cities = [];
+      const pref = prefs.find((pref) => pref.都道府県コード === prefCode);
+      if (pref) {
+        hiddenInput.value = pref.都道府県名;
+      }
+
+      const cities: Geolonia.City[] = [];
       try {
         const body = await fetchAPI<Geolonia.City[]>(`japan/${prefCode}.json`);
         cities.push(...body);
@@ -100,13 +107,18 @@ const main = async () => {
             removeSelect(selectSmallArea);
           }
           try {
-            selectSmallArea = renderSelect("small-area", "大字町丁目");
+            selectSmallArea = renderSelect("small_area_code", "大字町丁目");
           } catch (error) {
             showError(error.message);
             return;
           }
           const cityCode = event.target.value;
-          const smallAreas = [];
+          const city = cities.find((city) => city.市区町村コード === cityCode);
+          if (city) {
+            hiddenInput.value = pref.都道府県名 + city.市区町村名;
+          }
+
+          const smallAreas: Geolonia.SmallArea[] = [];
           try {
             const body = await fetchAPI<Geolonia.SmallArea[]>(
               `japan/${prefCode}/${cityCode}.json`
@@ -124,6 +136,19 @@ const main = async () => {
             selectSmallArea.appendChild(option);
           });
           selectSmallArea.disabled = false;
+
+          selectSmallArea.addEventListener("change", (event) => {
+            if (event.target instanceof HTMLSelectElement) {
+              const smallAreaCode = event.target.value;
+              const smallArea = smallAreas.find(
+                (smallArea) => smallArea.大字町丁目コード === smallAreaCode
+              );
+              if (smallArea) {
+                hiddenInput.value =
+                  pref.都道府県名 + city.市区町村名 + smallArea.大字町丁目名;
+              }
+            }
+          });
         }
       });
     }

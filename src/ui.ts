@@ -1,5 +1,16 @@
 const target = document.getElementById("address");
 
+export const renderHiddenInput = () => {
+  if (!target) {
+    throw new Error("no target found.");
+  }
+  const hiddenInput = document.createElement("input");
+  hiddenInput.type = "hidden";
+  hiddenInput.name = "address";
+  target.appendChild(hiddenInput);
+  return hiddenInput;
+};
+
 export const renderSelect = (name: string, title: string) => {
   if (!target) {
     throw new Error("no target found.");

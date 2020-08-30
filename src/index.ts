@@ -1,12 +1,9 @@
-import { renderHiddenInput, renderSelect, removeSelect } from "./ui";
-
-declare global {
-  interface Window {
-    geolonia?: {
-      address?: () => void;
-    };
-  }
-}
+import {
+  renderHiddenInput,
+  renderSelect,
+  removeSelect,
+  appendOptions,
+} from "./ui";
 
 const APIBase =
   "https://cdn.geolonia.com/address" &&
@@ -16,7 +13,7 @@ const APIBase =
  *
  * @param {string} path path for the Address API
  */
-const fetchAPI = async <T = any>(path: string) => {
+const fetchItems = async <T>(path: string) => {
   try {
     const data = await fetch(`${APIBase}/${path}`).then((res) => {
       if (res.status > 299) {
@@ -25,9 +22,10 @@ const fetchAPI = async <T = any>(path: string) => {
         return res.json();
       }
     });
-    return data as T;
+    return data as T[];
   } catch (error) {
-    throw error;
+    showError(error.message);
+    return [];
   }
 };
 
@@ -35,36 +33,21 @@ const showError = (message: string) => {
   alert(message);
 };
 
-const main = async () => {
-  const hiddenInput = renderHiddenInput();
-
-  const prefs: Geolonia.Pref[] = [];
-  try {
-    const body = await fetchAPI<Geolonia.Pref[]>("japan.json");
-    prefs.push(...body);
-  } catch (error) {
-    showError(error.message);
-    return;
+const main = async (targetElementId: string = "address") => {
+  const target = document.getElementById(targetElementId);
+  if (!target) {
+    throw new Error("no target found.");
   }
 
-  let selectPref: HTMLSelectElement;
+  const hiddenInput = renderHiddenInput(target);
+
+  const prefs = await fetchItems<Geolonia.Pref>("japan.json");
+
+  const selectPref = renderSelect(target, "pref_code", "都道府県");
   let selectCity: HTMLSelectElement;
   let selectSmallArea: HTMLSelectElement;
 
-  try {
-    selectPref = renderSelect("pref_code", "都道府県");
-  } catch (error) {
-    showError(error.message);
-    return;
-  }
-
-  prefs.forEach((pref) => {
-    const option = document.createElement("option");
-    option.value = pref.都道府県コード;
-    option.innerText = pref.都道府県名;
-    selectPref.appendChild(option);
-  });
-  selectPref.disabled = false;
+  appendOptions(selectPref, prefs, "都道府県コード", "都道府県名");
 
   selectPref.addEventListener("change", async (event) => {
     if (event.target instanceof HTMLSelectElement) {
@@ -74,70 +57,45 @@ const main = async () => {
       if (selectSmallArea) {
         removeSelect(selectSmallArea, true);
       }
-      try {
-        selectCity = renderSelect("city_code", "市区町村");
-      } catch (error) {
-        showError(error.message);
-        return;
-      }
+      selectCity = renderSelect(target, "city_code", "市区町村");
+
       const prefCode = event.target.value;
       const pref = prefs.find((pref) => pref.都道府県コード === prefCode);
       if (pref) {
         hiddenInput.value = pref.都道府県名;
       }
 
-      const cities: Geolonia.City[] = [];
-      try {
-        const body = await fetchAPI<Geolonia.City[]>(`japan/${prefCode}.json`);
-        cities.push(...body);
-      } catch (error) {
-        showError(error.message);
-        return;
-      }
+      const cities = await fetchItems<Geolonia.City>(`japan/${prefCode}.json`);
 
-      cities.forEach((city) => {
-        const option = document.createElement("option");
-        option.value = city.市区町村コード;
-        option.innerText = city.市区町村名;
-        selectCity.appendChild(option);
-      });
-      selectCity.disabled = false;
+      appendOptions(selectCity, cities, "市区町村コード", "市区町村名");
 
       selectCity.addEventListener("change", async (event) => {
         if (event.target instanceof HTMLSelectElement) {
           if (selectSmallArea) {
             removeSelect(selectSmallArea);
           }
-          try {
-            selectSmallArea = renderSelect("small_area_code", "大字町丁目");
-          } catch (error) {
-            showError(error.message);
-            return;
-          }
+          selectSmallArea = renderSelect(
+            target,
+            "small_area_code",
+            "大字町丁目"
+          );
+
           const cityCode = event.target.value;
           const city = cities.find((city) => city.市区町村コード === cityCode);
           if (city) {
             hiddenInput.value = pref.都道府県名 + city.市区町村名;
           }
 
-          const smallAreas: Geolonia.SmallArea[] = [];
-          try {
-            const body = await fetchAPI<Geolonia.SmallArea[]>(
-              `japan/${prefCode}/${cityCode}.json`
-            );
-            smallAreas.push(...body);
-          } catch (error) {
-            showError(error.message);
-            return;
-          }
+          const smallAreas = await fetchItems<Geolonia.SmallArea>(
+            `japan/${prefCode}/${cityCode}.json`
+          );
 
-          smallAreas.forEach((smallArea) => {
-            const option = document.createElement("option");
-            option.value = smallArea.大字町丁目コード;
-            option.innerText = smallArea.大字町丁目名;
-            selectSmallArea.appendChild(option);
-          });
-          selectSmallArea.disabled = false;
+          appendOptions(
+            selectSmallArea,
+            smallAreas,
+            "大字町丁目コード",
+            "大字町丁目名"
+          );
 
           selectSmallArea.addEventListener("change", (event) => {
             if (event.target instanceof HTMLSelectElement) {
@@ -156,6 +114,16 @@ const main = async () => {
     }
   });
 };
+
+// make global variables
+
+declare global {
+  interface Window {
+    geolonia?: {
+      address?: () => void;
+    };
+  }
+}
 
 if (!window.geolonia) {
   window.geolonia = {};

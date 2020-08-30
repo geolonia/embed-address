@@ -1,9 +1,4 @@
-const target = document.getElementById("address");
-
-export const renderHiddenInput = () => {
-  if (!target) {
-    throw new Error("no target found.");
-  }
+export const renderHiddenInput = (target: HTMLElement) => {
   const hiddenInput = document.createElement("input");
   hiddenInput.type = "hidden";
   hiddenInput.name = "address";
@@ -11,7 +6,11 @@ export const renderHiddenInput = () => {
   return hiddenInput;
 };
 
-export const renderSelect = (name: string, title: string) => {
+export const renderSelect = (
+  target: HTMLElement,
+  name: string,
+  title: string
+) => {
   if (!target) {
     throw new Error("no target found.");
   }
@@ -45,4 +44,19 @@ export const removeSelect = (
     }
   }
   selectElement.remove();
+};
+
+export const appendOptions = (
+  target: HTMLSelectElement,
+  options: any[],
+  valueProp: string,
+  labelProp: string
+) => {
+  options.forEach((pref) => {
+    const option = document.createElement("option");
+    option.value = pref[valueProp];
+    option.innerText = pref[labelProp];
+    target.appendChild(option);
+  });
+  target.disabled = false;
 };

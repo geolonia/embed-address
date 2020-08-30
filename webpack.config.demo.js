@@ -8,6 +8,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: __dirname + "/public/index.html",
       filename: "index.html",
+      inject: false,
     }),
   ],
   devServer: {

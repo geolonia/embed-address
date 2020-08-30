@@ -1,10 +1,12 @@
+import { renderHiddenInput, renderSelect, removeSelect } from "./ui";
+
 declare global {
   interface Window {
-    geolonia: {};
+    geolonia?: {
+      address?: () => void;
+    };
   }
 }
-
-import { renderHiddenInput, renderSelect, removeSelect } from "./ui";
 
 const APIBase =
   "https://cdn.geolonia.com/address" &&
@@ -155,4 +157,7 @@ const main = async () => {
   });
 };
 
-main();
+if (!window.geolonia) {
+  window.geolonia = {};
+}
+window.geolonia.address = main;

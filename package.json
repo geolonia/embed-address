@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/bundle.js",
+  "private": true,
   "scripts": {
     "start": "webpack-dev-server --config webpack.config.demo.js",
+    "build": "webpack -p",
     "build:demo": "webpack -p --config webpack.config.demo.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -13,8 +15,8 @@
     "url": "git+https://github.com/geolonia/prototype-address-input-support.git"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "geolonia",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/geolonia/prototype-address-input-support/issues"
   },

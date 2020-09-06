@@ -9,11 +9,14 @@ type FormRenderOptions = {
 type RenderedForms = {
   buttonGeolocation: HTMLButtonElement;
   selectPrefCode: HTMLSelectElement;
+  inputPrefName: HTMLInputElement;
   selectCityCode: HTMLSelectElement;
+  inputCityName: HTMLInputElement;
   inputSmallArea: HTMLInputElement;
   datalistSmallArea: HTMLDataListElement;
   inputIsSmallAreaException: HTMLInputElement;
   spanErrorMessage: HTMLSpanElement;
+  parentalForm: HTMLFormElement | null;
 };
 
 const defaultFormRenderOptions: FormRenderOptions = {
@@ -155,6 +158,7 @@ export const renderForms = (
     const spanErrorMessage = document.querySelector<HTMLSpanElement>(
       `#${span_error_message_id}`
     );
+    const parentalForm = target.closest("form");
 
     selectPrefCode.addEventListener("change", (event) => {
       if (event.target instanceof HTMLSelectElement) {
@@ -209,11 +213,14 @@ export const renderForms = (
     resolve({
       buttonGeolocation,
       selectPrefCode,
+      inputPrefName,
       selectCityCode,
+      inputCityName,
       inputSmallArea,
       datalistSmallArea,
       inputIsSmallAreaException,
       spanErrorMessage,
+      parentalForm,
     });
   });
 };

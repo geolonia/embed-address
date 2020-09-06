@@ -5,15 +5,12 @@ import {
   removeOptions,
 } from "./ui";
 
+// TODO: Fix me
 const AddressAPIBase =
   "https://cdn.geolonia.com/address" &&
   "https://deploy-preview-4--awesome-jepsen-b8a456.netlify.app/address";
 const reverseGeocodeAPIBase = "https://api.geolonia.com/dev/reverseGeocode";
 
-/**
- *
- * @param {string} path path for the Address API
- */
 const fetchAddresses = async <T>(path: string) => {
   try {
     const data = await fetch(`${AddressAPIBase}/${path}`).then((res) => {
@@ -48,6 +45,22 @@ const fetchReverseGeocode = async (lng: number, lat: number) => {
   }
 };
 
+const getCurrentPosition = () => {
+  return new Promise<{ lat: number; lng: number }>((resolve, reject) => {
+    window.navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        resolve({ lat, lng });
+      },
+      (error) => reject(error)
+    );
+  });
+};
+
+/**
+ * render Forms
+ * @param targetItem target container
+ */
 const address = async (targetItem: HTMLElement | string) => {
   let target: HTMLElement;
   if (targetItem instanceof HTMLElement) {
@@ -60,6 +73,8 @@ const address = async (targetItem: HTMLElement | string) => {
   }
 
   // state for those select element
+  let lat: number;
+  let lng: number;
   let prefCode: string = "";
   let cityCode: string = "";
 
@@ -67,11 +82,14 @@ const address = async (targetItem: HTMLElement | string) => {
     {
       buttonGeolocation,
       selectPrefCode,
+      inputPrefName,
       selectCityCode,
+      inputCityName,
       inputSmallArea,
       datalistSmallArea,
       inputIsSmallAreaException,
       spanErrorMessage,
+      parentalForm,
     },
     prefectures,
   ] = await Promise.all([
@@ -85,62 +103,73 @@ const address = async (targetItem: HTMLElement | string) => {
     return;
   }
 
-  buttonGeolocation.addEventListener("click", () => {
-    window.navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude: lat, longitude: lng } = pos.coords;
-        const data = await fetchReverseGeocode(lng, lat);
-        if (!data) {
-          spanErrorMessage.innerText =
-            "何かのエラーです。現在位置から住所を取得できませんでした。";
-          return;
-        }
+  buttonGeolocation.addEventListener("click", async () => {
+    try {
+      const position = await getCurrentPosition();
+      lat = position.lat;
+      lng = position.lng;
+    } catch (error) {
+      console.error(error);
+      spanErrorMessage.innerText = "現在位置から住所を取得できませんでした。";
+      return;
+    }
 
-        spanErrorMessage.innerText = "";
-        const { PREF, CITY, S_NAME } = data;
-        prefCode = PREF;
-        cityCode = PREF + CITY;
-        const [cities, smallAreas] = await Promise.all([
-          fetchAddresses<Geolonia.City>(`japan/${prefCode}.json`),
-          fetchAddresses<Geolonia.SmallArea>(
-            `japan/${prefCode}/${cityCode}.json`
-          ),
-        ]);
-        if (!cities || !smallAreas) {
-          if (!prefectures) {
-            spanErrorMessage.innerText =
-              "何かのエラーです。住所データを取得できませんでした。";
-            return;
-          }
-        }
+    const data = await fetchReverseGeocode(lng, lat);
+    if (!data) {
+      spanErrorMessage.innerText =
+        "何かのエラーです。現在位置から住所を取得できませんでした。";
+      return;
+    }
 
-        await Promise.all([
-          removeOptions(selectCityCode),
-          removeOptions(datalistSmallArea),
-        ]);
-        await Promise.all([
-          appendSelectOptions(
-            selectCityCode,
-            cities,
-            "市区町村コード",
-            "市区町村名"
-          ),
-          appendDatalistOptions(datalistSmallArea, smallAreas, "大字町丁目名"),
-        ]);
-        selectPrefCode.value = prefCode;
-        selectCityCode.value = cityCode;
-        inputSmallArea.value = S_NAME || "";
-        inputIsSmallAreaException.value = !!smallAreas.find(
-          (smallArea) => smallArea.大字町丁目名 === S_NAME
-        )
-          ? "false"
-          : "true";
-      },
-      (error) => {
-        console.error(error);
-        spanErrorMessage.innerText = "現在位置から住所を取得できませんでした。";
+    spanErrorMessage.innerText = "";
+    const { PREF, CITY, S_NAME } = data;
+    prefCode = PREF;
+    cityCode = PREF + CITY;
+    const [cities, smallAreas] = await Promise.all([
+      fetchAddresses<Geolonia.City>(`japan/${prefCode}.json`),
+      fetchAddresses<Geolonia.SmallArea>(`japan/${prefCode}/${cityCode}.json`),
+    ]);
+
+    if (!cities || !smallAreas) {
+      if (!prefectures) {
+        spanErrorMessage.innerText =
+          "何かのエラーです。住所データを取得できませんでした。";
+        return;
       }
+    }
+
+    const prefecture = prefectures.find(
+      (prefecture) => prefecture.都道府県コード === prefCode
     );
+    const city = cities.find((city) => city.市区町村コード === cityCode);
+    if (prefecture) {
+      inputPrefName.value = prefecture.都道府県名;
+    }
+    if (city) {
+      inputCityName.value = city.市区町村名;
+    }
+
+    await Promise.all([
+      removeOptions(selectCityCode),
+      removeOptions(datalistSmallArea),
+    ]);
+    await Promise.all([
+      appendSelectOptions(
+        selectCityCode,
+        cities,
+        "市区町村コード",
+        "市区町村名"
+      ),
+      appendDatalistOptions(datalistSmallArea, smallAreas, "大字町丁目名"),
+    ]);
+    selectPrefCode.value = prefCode;
+    selectCityCode.value = cityCode;
+    inputSmallArea.value = S_NAME || "";
+    inputIsSmallAreaException.value = !!smallAreas.find(
+      (smallArea) => smallArea.大字町丁目名 === S_NAME
+    )
+      ? "false"
+      : "true";
   });
 
   await appendSelectOptions(
@@ -203,6 +232,28 @@ const address = async (targetItem: HTMLElement | string) => {
       );
     }
   });
+
+  // send to Geolonia
+  if (parentalForm) {
+    parentalForm.addEventListener("submit", (event) => {
+      if (event.target instanceof HTMLFormElement && lat && lng) {
+        const formData = new FormData(event.target);
+        const newFormData = new FormData();
+        newFormData.set("prefecture", formData.get("prefecture"));
+        newFormData.set("city", formData.get("city"));
+        newFormData.set("small-area", formData.get("small-area"));
+        newFormData.set("other-address", formData.get("other-address"));
+        newFormData.set("is-exception", formData.get("is-exception"));
+        newFormData.set("lat", lat.toString());
+        newFormData.set("lng", lng.toString());
+
+        fetch("path/to/geolonia/server", {
+          method: "POST",
+          body: newFormData,
+        });
+      }
+    });
+  }
 };
 
 // render automatically if #address exists

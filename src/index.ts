@@ -6,9 +6,7 @@ import {
 } from "./ui";
 
 // TODO: Fix me
-const AddressAPIBase =
-  "https://cdn.geolonia.com/address" &&
-  "https://deploy-preview-4--awesome-jepsen-b8a456.netlify.app/address";
+const AddressAPIBase = "https://cdn.geolonia.com/address";
 const reverseGeocodeAPIBase = "https://api.geolonia.com/dev/reverseGeocode";
 
 const fetchAddresses = async <T>(path: string) => {

@@ -1,74 +1,163 @@
-import "./style.scss";
-
-export const decorateTarget = (target: HTMLElement) => {
-  target.className += " geolonia_address_target";
-  const container = document.createElement("div");
-  container.className = "container";
-  target.appendChild(container);
-  return container;
+type RenderedForms = {
+  selectPrefCode: HTMLSelectElement;
+  selectCityCode: HTMLSelectElement;
+  inputSmallArea: HTMLInputElement;
+  datalistSmallArea: HTMLDataListElement;
 };
 
-export const renderHiddenInput = (target: HTMLElement) => {
-  const hiddenInput = document.createElement("input");
-  hiddenInput.type = "hidden";
-  hiddenInput.name = "address";
-  target.appendChild(hiddenInput);
-  return hiddenInput;
-};
-
-export const renderSelect = (
-  target: HTMLElement,
-  name: string,
-  title: string
-) => {
-  if (!target) {
-    throw new Error("no target found.");
-  }
-  const wrap_id = `geolonia_${name}`;
-  const id = `geolonia_${name}_controls`;
-  const wrap = document.createElement("div");
-  wrap.id = wrap_id;
-  wrap.className = "geolonia_address_field form-group row";
-  const label = document.createElement("label");
-  label.innerText = title;
-  label.htmlFor = id;
-  label.className = `geolonia_address_${name} col-sm-2 col-form-label`;
-  const select = document.createElement("select");
-  select.name = name;
-  select.id = id;
-  select.className = `geolonia_address_${name} form-control`;
-  select.disabled = true;
-  const option = document.createElement("option");
-  option.selected = true;
-  option.disabled = true;
-  option.innerText = "-";
-  option.className = `geolonia_address_${name}`;
-
-  select.appendChild(option);
-  wrap.appendChild(label);
-  wrap.appendChild(select);
-  target.appendChild(wrap);
-  return select;
-};
-
-export const removeSelect = (name: string) => {
-  const wrap_id = `geolonia_${name}`;
-  const target = document.getElementById(wrap_id);
-  target.remove();
-};
-
-export const appendOptions = (
+export const appendSelectOptions = (
   target: HTMLSelectElement,
   options: any[],
   valueProp: string,
   labelProp: string
 ) => {
-  options.forEach((pref) => {
-    const option = document.createElement("option");
-    option.value = pref[valueProp];
-    option.innerText = pref[labelProp];
-    option.className = `geolonia_address_${target.name}`;
-    target.appendChild(option);
+  return new Promise((resolve) => {
+    options.forEach((pref) => {
+      const option = document.createElement("option");
+      option.value = pref[valueProp];
+      option.innerText = pref[labelProp];
+      option.className = `geolonia_address_${target.name}`;
+      target.appendChild(option);
+    });
+    target.disabled = false;
+    resolve();
   });
-  target.disabled = false;
+};
+
+export const appendDatalistOptions = (
+  target: HTMLDataListElement,
+  options: any[],
+  value: string
+) => {
+  return new Promise((resolve) => {
+    options.forEach((pref) => {
+      const option = document.createElement("option");
+      option.value = pref[value];
+      target.appendChild(option);
+    });
+    resolve();
+  });
+};
+
+export const removeOptions = (
+  target: HTMLSelectElement | HTMLDataListElement
+) => {
+  return new Promise((resolve) => {
+    [...target.children].forEach((child) => {
+      const option = child as HTMLOptionElement;
+      if (option.innerHTML !== "-") {
+        option.remove();
+      } else {
+        option.selected = true;
+      }
+    });
+    resolve();
+  });
+};
+
+export const renderForms = (target: HTMLElement) => {
+  return new Promise<RenderedForms>((resolve) => {
+    target.className += " geolonia_address_wrap";
+    const select_pref_code_id = "geolonia-pref-code";
+    const input_pref_name_id = "geolonia-prefecture-name";
+    const select_city_code_id = "geolonia-city-code";
+    const input_city_name_id = "geolonia-city-name";
+    const input_small_area_id = "geolonia-small-area";
+    const datalist_small_area_id = "geolonia-small-area-datalist";
+    const input_is_exceptive_id = "geolonia-small-area-is-exceptive";
+    const input_other_address_id = "geolonia-other-address";
+
+    target.innerHTML = `
+    <label for="${select_pref_code_id}">都道府県</label>
+    <select id="${select_pref_code_id}" disabled="true">
+      <option selected disabled>-</option>
+    </select>
+    <input type="hidden" id="${input_pref_name_id}" name="prefecture" />
+
+    <label for="${select_city_code_id}">市区町村</label>
+    <select id="${select_city_code_id}" disabled="true">
+          <option selected disabled>-</option>
+    </select>
+    <input type="hidden" id="${input_city_name_id}" name="city" />
+
+    <label for="${input_small_area_id}">大字町丁目</label>
+    <input type="text" id="${input_small_area_id}" list="${datalist_small_area_id}" name="small-area"></select>
+    <datalist id="${datalist_small_area_id}"></datalist>
+    <input type="hidden" id=${input_is_exceptive_id} name="is-exceptive" />
+
+    <label for="${input_other_address_id}">その他の住所</label>
+    <input type="text" id="${input_other_address_id}" name="other-address"></select>
+  `;
+    const selectPrefCode = document.querySelector<HTMLSelectElement>(
+      `#${select_pref_code_id}`
+    );
+    const inputPrefName = document.querySelector<HTMLInputElement>(
+      `#${input_pref_name_id}`
+    );
+    const selectCityCode = document.querySelector<HTMLSelectElement>(
+      `#${select_city_code_id}`
+    );
+    const inputCityName = document.querySelector<HTMLInputElement>(
+      `#${input_city_name_id}`
+    );
+    const inputSmallArea = document.querySelector<HTMLInputElement>(
+      `#${input_small_area_id}`
+    );
+    const datalistSmallArea = document.querySelector<HTMLDataListElement>(
+      `#${datalist_small_area_id}`
+    );
+    const inputIsSmallAreaExceptive = document.querySelector<HTMLInputElement>(
+      `#${input_is_exceptive_id}`
+    );
+
+    selectPrefCode.addEventListener("change", (event) => {
+      if (event.target instanceof HTMLSelectElement) {
+        const prefCode = event.target.value;
+        const options = [
+          ...document.querySelectorAll<HTMLOptionElement>(
+            `#${select_pref_code_id} option`
+          ),
+        ];
+        const option = options.find((option) => option.value === prefCode);
+        if (option) {
+          inputPrefName.value = option.innerText;
+        }
+      }
+    });
+
+    selectCityCode.addEventListener("change", (event) => {
+      if (event.target instanceof HTMLSelectElement) {
+        const cityCode = event.target.value;
+        const options = [
+          ...document.querySelectorAll<HTMLOptionElement>(
+            `#${select_city_code_id} option`
+          ),
+        ];
+        const option = options.find((option) => option.value === cityCode);
+        if (option) {
+          inputCityName.value = option.innerText;
+        }
+      }
+    });
+
+    inputSmallArea.addEventListener("change", (event) => {
+      if (event.target instanceof HTMLInputElement) {
+        const smallAreaName = event.target.value;
+        const options = [
+          ...document.querySelectorAll<HTMLOptionElement>(
+            `#${datalist_small_area_id} option`
+          ),
+        ];
+        const option = options.find((option) => option.value === smallAreaName);
+        inputIsSmallAreaExceptive.value = option ? "false" : "true";
+      }
+    });
+
+    resolve({
+      selectPrefCode,
+      selectCityCode,
+      inputSmallArea,
+      datalistSmallArea,
+    });
+  });
 };

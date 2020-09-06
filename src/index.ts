@@ -1,9 +1,8 @@
 import {
-  decorateTarget,
-  renderHiddenInput,
-  renderSelect,
-  removeSelect,
-  appendOptions,
+  renderForms,
+  appendSelectOptions,
+  appendDatalistOptions,
+  removeOptions,
 } from "./ui";
 
 const APIBase =
@@ -30,89 +29,60 @@ const fetchItems = async <T>(path: string) => {
   }
 };
 
-const showError = (message: string) => {
-  alert(message);
-};
-
 const main = async (targetElementId: string = "address") => {
-  let target = document.getElementById(targetElementId);
+  const target = document.getElementById(targetElementId);
   if (!target) {
     throw new Error("no target found.");
   }
 
-  target = decorateTarget(target);
-  const hiddenInput = renderHiddenInput(target);
+  let prefCode: string = "";
+  let cityCode: string = "";
 
-  const prefs = await fetchItems<Geolonia.Pref>("japan.json");
+  const [
+    { selectPrefCode, selectCityCode, inputSmallArea, datalistSmallArea },
+    prefectures,
+  ] = await Promise.all([
+    renderForms(target),
+    fetchItems<Geolonia.Pref>("japan.json"),
+  ]);
 
-  const selectPref = renderSelect(target, "pref_code", "都道府県");
-  let selectCity: HTMLSelectElement;
-  let selectSmallArea: HTMLSelectElement;
+  appendSelectOptions(
+    selectPrefCode,
+    prefectures,
+    "都道府県コード",
+    "都道府県名"
+  );
 
-  appendOptions(selectPref, prefs, "都道府県コード", "都道府県名");
-
-  selectPref.addEventListener("change", async (event) => {
+  selectPrefCode.addEventListener("change", async (event) => {
     if (event.target instanceof HTMLSelectElement) {
-      if (selectCity) {
-        removeSelect("city_code");
-      }
-      if (selectSmallArea) {
-        removeSelect("small_area_code");
-      }
-      selectCity = renderSelect(target, "city_code", "市区町村");
-
-      const prefCode = event.target.value;
-      const pref = prefs.find((pref) => pref.都道府県コード === prefCode);
-      if (pref) {
-        hiddenInput.value = pref.都道府県名;
-      }
-
+      prefCode = event.target.value;
       const cities = await fetchItems<Geolonia.City>(`japan/${prefCode}.json`);
+      await Promise.all([
+        removeOptions(selectCityCode),
+        removeOptions(datalistSmallArea),
+      ]);
+      await appendSelectOptions(
+        selectCityCode,
+        cities,
+        "市区町村コード",
+        "市区町村名"
+      );
+      selectCityCode.disabled = false;
+    }
+  });
 
-      appendOptions(selectCity, cities, "市区町村コード", "市区町村名");
-
-      selectCity.addEventListener("change", async (event) => {
-        if (event.target instanceof HTMLSelectElement) {
-          if (selectSmallArea) {
-            removeSelect("small_area_code");
-          }
-          selectSmallArea = renderSelect(
-            target,
-            "small_area_code",
-            "大字町丁目"
-          );
-
-          const cityCode = event.target.value;
-          const city = cities.find((city) => city.市区町村コード === cityCode);
-          if (city) {
-            hiddenInput.value = pref.都道府県名 + city.市区町村名;
-          }
-
-          const smallAreas = await fetchItems<Geolonia.SmallArea>(
-            `japan/${prefCode}/${cityCode}.json`
-          );
-
-          appendOptions(
-            selectSmallArea,
-            smallAreas,
-            "大字町丁目コード",
-            "大字町丁目名"
-          );
-
-          selectSmallArea.addEventListener("change", (event) => {
-            if (event.target instanceof HTMLSelectElement) {
-              const smallAreaCode = event.target.value;
-              const smallArea = smallAreas.find(
-                (smallArea) => smallArea.大字町丁目コード === smallAreaCode
-              );
-              if (smallArea) {
-                hiddenInput.value =
-                  pref.都道府県名 + city.市区町村名 + smallArea.大字町丁目名;
-              }
-            }
-          });
-        }
-      });
+  selectCityCode.addEventListener("change", async (event) => {
+    if (event.target instanceof HTMLSelectElement) {
+      cityCode = event.target.value;
+      const smallAreas = await fetchItems<Geolonia.SmallArea>(
+        `japan/${prefCode}/${cityCode}.json`
+      );
+      await removeOptions(datalistSmallArea);
+      await appendDatalistOptions(
+        datalistSmallArea,
+        smallAreas,
+        "大字町丁目名"
+      );
     }
   });
 };

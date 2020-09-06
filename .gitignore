@@ -65,5 +65,3 @@ typings/
 # use npm
 yarn.lock
 
-# build assets
-/dist

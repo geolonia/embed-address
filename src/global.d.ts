@@ -29,4 +29,11 @@ declare namespace Geolonia {
     都道府県名カナ: string;
     都道府県名ローマ字: string;
   };
+  export type ReverseGeocodedSmallArea = {
+    PREF: string;
+    PREF_NAME: string;
+    CITY: string;
+    CITY_NAME: string;
+    S_NAME: string | null;
+  };
 }

@@ -1,8 +1,10 @@
 type RenderedForms = {
+  buttonGeolocation: HTMLButtonElement;
   selectPrefCode: HTMLSelectElement;
   selectCityCode: HTMLSelectElement;
   inputSmallArea: HTMLInputElement;
   datalistSmallArea: HTMLDataListElement;
+  inputIsSmallAreaException: HTMLInputElement;
 };
 
 export const appendSelectOptions = (
@@ -57,25 +59,27 @@ export const removeOptions = (
 
 export const renderForms = (target: HTMLElement) => {
   return new Promise<RenderedForms>((resolve) => {
-    target.className += " geolonia_address_wrap";
+    target.className += (target.className ? " " : "") + "geolonia_address_wrap";
+    const button_geolocation_id = "geolonia-reverse-geocode-button";
     const select_pref_code_id = "geolonia-pref-code";
     const input_pref_name_id = "geolonia-prefecture-name";
     const select_city_code_id = "geolonia-city-code";
     const input_city_name_id = "geolonia-city-name";
     const input_small_area_id = "geolonia-small-area";
     const datalist_small_area_id = "geolonia-small-area-datalist";
-    const input_is_exceptive_id = "geolonia-small-area-is-exceptive";
+    const input_is_exception_id = "geolonia-small-area-is-exception";
     const input_other_address_id = "geolonia-other-address";
 
-    target.innerHTML = `
+    target.innerHTML += `
+    <button type="button" id="${button_geolocation_id}">現在地から住所を入力</button>
     <label for="${select_pref_code_id}">都道府県</label>
-    <select id="${select_pref_code_id}" disabled="true">
+    <select id="${select_pref_code_id}" disabled>
       <option selected disabled>-</option>
     </select>
     <input type="hidden" id="${input_pref_name_id}" name="prefecture" />
 
     <label for="${select_city_code_id}">市区町村</label>
-    <select id="${select_city_code_id}" disabled="true">
+    <select id="${select_city_code_id}" disabled>
           <option selected disabled>-</option>
     </select>
     <input type="hidden" id="${input_city_name_id}" name="city" />
@@ -83,11 +87,14 @@ export const renderForms = (target: HTMLElement) => {
     <label for="${input_small_area_id}">大字町丁目</label>
     <input type="text" id="${input_small_area_id}" list="${datalist_small_area_id}" name="small-area"></select>
     <datalist id="${datalist_small_area_id}"></datalist>
-    <input type="hidden" id=${input_is_exceptive_id} name="is-exceptive" />
+    <input type="hidden" id=${input_is_exception_id} name="is-exception" />
 
     <label for="${input_other_address_id}">その他の住所</label>
     <input type="text" id="${input_other_address_id}" name="other-address"></select>
   `;
+    const buttonGeolocation = document.getElementById(
+      button_geolocation_id
+    ) as HTMLButtonElement;
     const selectPrefCode = document.querySelector<HTMLSelectElement>(
       `#${select_pref_code_id}`
     );
@@ -106,8 +113,8 @@ export const renderForms = (target: HTMLElement) => {
     const datalistSmallArea = document.querySelector<HTMLDataListElement>(
       `#${datalist_small_area_id}`
     );
-    const inputIsSmallAreaExceptive = document.querySelector<HTMLInputElement>(
-      `#${input_is_exceptive_id}`
+    const inputIsSmallAreaException = document.querySelector<HTMLInputElement>(
+      `#${input_is_exception_id}`
     );
 
     selectPrefCode.addEventListener("change", (event) => {
@@ -149,15 +156,17 @@ export const renderForms = (target: HTMLElement) => {
           ),
         ];
         const option = options.find((option) => option.value === smallAreaName);
-        inputIsSmallAreaExceptive.value = option ? "false" : "true";
+        inputIsSmallAreaException.value = option ? "false" : "true";
       }
     });
 
     resolve({
+      buttonGeolocation,
       selectPrefCode,
       selectCityCode,
       inputSmallArea,
       datalistSmallArea,
+      inputIsSmallAreaException,
     });
   });
 };

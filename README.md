@@ -7,6 +7,7 @@
 form 要素の内部など、簡単入力フォームを配置したい場所に `#address` という `id` 属性を持つ要素を配置し、API を読み込むことでフォームパーツを配置できます。
 
 ```html
+<!-- 例 -->
 <body>
   <form>
     <div id="address"></div>
@@ -18,6 +19,8 @@ form 要素の内部など、簡単入力フォームを配置したい場所に
 
 デフォルトの設定では次のフォームデータがユーザーのサーバーに POST されます。
 
+- `pref-code`: 都道府県コード
+- `city-code`: 市区町村コード
 - `prefecture`: 都道府県名
 - `city`: 市区町村名
 - `small-area`: 大字町丁目名
@@ -27,6 +30,7 @@ form 要素の内部など、簡単入力フォームを配置したい場所に
 `window.geolonia.address` をコールすることで `id="address"` 以外の `id` を持つ要素に対して簡単入力フォームを配置できます。
 
 ```html
+<!-- 例 -->
 <body>
   <form>
     <div id="my-custom-address"></div>
@@ -41,9 +45,10 @@ form 要素の内部など、簡単入力フォームを配置したい場所に
 
 ### カスタマイズ
 
-`placeholder` 属性のテキストやフォームの `name` 属性をカスタマイズできます。
+`data-` 属性を使うことで、 フォームのプレースホルダーや `name` 属性をカスタマイズできます。
 
 ```html
+<!-- デフォルトのカスタマイズ属性 -->
 <div
   id="address"
   data-geolocation-button-label="現在位置から住所を入力"

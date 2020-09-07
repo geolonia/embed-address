@@ -1,11 +1,11 @@
 import { parseAtts } from "./util";
 
 test("should parse atts safely", () => {
-  const MockDataset = {
+  const MockElement = ({
     dataset: {
       prefectureLabel: '"></label><script>alert(1)</script>',
     },
-  };
-  const atts = parseAtts(MockDataset as any);
+  } as unknown) as HTMLElement;
+  const atts = parseAtts(MockElement);
   expect(atts.prefectureLabel).not.toContain("<script>");
 });

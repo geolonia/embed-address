@@ -4,44 +4,8 @@ import {
   appendDatalistOptions,
   removeOptions,
 } from "./ui";
-
-// TODO: Fix me
-const AddressAPIBase = "https://cdn.geolonia.com/address";
-const reverseGeocodeAPIBase = "https://api.geolonia.com/dev/reverseGeocode";
-
-const fetchAddresses = async <T>(path: string) => {
-  try {
-    const data = await fetch(`${AddressAPIBase}/${path}`).then((res) => {
-      if (res.status > 299) {
-        console.error(res);
-        throw new Error("request error");
-      } else {
-        return res.json();
-      }
-    });
-    return data as T[];
-  } catch (error) {
-    return null;
-  }
-};
-
-const fetchReverseGeocode = async (lng: number, lat: number) => {
-  try {
-    const data = await fetch(
-      `${reverseGeocodeAPIBase}?lng=${lng}&lat=${lat}`
-    ).then((res) => {
-      if (res.status > 299) {
-        console.error(res);
-        throw new Error("request error");
-      } else {
-        return res.json();
-      }
-    });
-    return data as Geolonia.ReverseGeocodedSmallArea;
-  } catch (error) {
-    return null;
-  }
-};
+import { fetchAddresses, fetchReverseGeocode } from "./api";
+import { defaultAtts, parseAtts } from "./util";
 
 const getCurrentPosition = () => {
   return new Promise<{ lat: number; lng: number }>((resolve, reject) => {
@@ -70,6 +34,8 @@ const address = async (targetItem: HTMLElement | string) => {
     throw new Error("no target found.");
   }
 
+  const options = parseAtts(target);
+
   // state for those select element
   let lat: number;
   let lng: number;
@@ -91,8 +57,8 @@ const address = async (targetItem: HTMLElement | string) => {
     },
     prefectures,
   ] = await Promise.all([
-    renderForms(target),
-    fetchAddresses<Geolonia.Pref>("japan.json"),
+    renderForms(target, options),
+    fetchAddresses<Geolonia.API.Pref>("japan.json"),
   ]);
 
   if (!prefectures) {
@@ -124,8 +90,10 @@ const address = async (targetItem: HTMLElement | string) => {
     prefCode = PREF;
     cityCode = PREF + CITY;
     const [cities, smallAreas] = await Promise.all([
-      fetchAddresses<Geolonia.City>(`japan/${prefCode}.json`),
-      fetchAddresses<Geolonia.SmallArea>(`japan/${prefCode}/${cityCode}.json`),
+      fetchAddresses<Geolonia.API.City>(`japan/${prefCode}.json`),
+      fetchAddresses<Geolonia.API.SmallArea>(
+        `japan/${prefCode}/${cityCode}.json`
+      ),
     ]);
 
     if (!cities || !smallAreas) {
@@ -181,7 +149,7 @@ const address = async (targetItem: HTMLElement | string) => {
   selectPrefCode.addEventListener("change", async (event) => {
     if (event.target instanceof HTMLSelectElement) {
       prefCode = event.target.value;
-      const cities = await fetchAddresses<Geolonia.City>(
+      const cities = await fetchAddresses<Geolonia.API.City>(
         `japan/${prefCode}.json`
       );
 
@@ -210,7 +178,7 @@ const address = async (targetItem: HTMLElement | string) => {
   selectCityCode.addEventListener("change", async (event) => {
     if (event.target instanceof HTMLSelectElement) {
       cityCode = event.target.value;
-      const smallAreas = await fetchAddresses<Geolonia.SmallArea>(
+      const smallAreas = await fetchAddresses<Geolonia.API.SmallArea>(
         `japan/${prefCode}/${cityCode}.json`
       );
 
@@ -237,10 +205,19 @@ const address = async (targetItem: HTMLElement | string) => {
       if (event.target instanceof HTMLFormElement && lat && lng) {
         const formData = new FormData(event.target);
         const newFormData = new FormData();
-        newFormData.set("prefecture", formData.get("prefecture"));
-        newFormData.set("city", formData.get("city"));
-        newFormData.set("small-area", formData.get("small-area"));
-        newFormData.set("other-address", formData.get("other-address"));
+        newFormData.set(
+          defaultAtts.prefectureName,
+          formData.get(options.prefectureName)
+        );
+        newFormData.set(defaultAtts.cityName, formData.get(options.cityName));
+        newFormData.set(
+          defaultAtts.smallAreaName,
+          formData.get(options.smallAreaName)
+        );
+        newFormData.set(
+          defaultAtts.otherAddressName,
+          formData.get(options.otherAddressName)
+        );
         newFormData.set("is-exception", formData.get("is-exception"));
         newFormData.set("lat", lat.toString());
         newFormData.set("lng", lng.toString());

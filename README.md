@@ -4,7 +4,7 @@
 
 ## 使い方
 
-1. form 要素の内部など、簡単入力フォームを配置したい場所に `#address` という ID 属性を持つ要素を配置し、API を読み込むだけで動作します。
+form 要素の内部など、簡単入力フォームを配置したい場所に `#address` という `id` 属性を持つ要素を配置し、API を読み込むことでフォームパーツを配置できます。
 
 ```html
 <body>
@@ -16,15 +16,21 @@
 </body>
 ```
 
-2. (オプション) 別の要素 ID を利用したい場合は、API を読み込んだ後に `window.geolonia.address` という関数をコールしてください。
+### カスタマイズ
 
-```html
-<form>
-  <div id="my-address-element" />
-  <button type="submit">送信</button>
-</form>
-<script src="https://api.geolonia.com/address-input?geolonia-api-key=YOUR-API-KEY"></script>
-<script>
-  window.geolonia.address("my-address-element");
-</script>
+`<label>`要素やフォームの `name` 属性をカスタマイズできます。
+
+```
+<div
+  id="address"
+  data-geolocation-button-label="現在位置から住所を入力"
+  data-prefecture-label="都道府県"
+  data-city-label="市区町村"
+  data-small-area-label="大字町丁目"
+  data-other-address-label="その他の住所"
+  data-prefecture-name="prefecture"
+  data-city-name="city"
+  data-small-area-name="small-area"
+  data-other-address-name="other-address"
+></div>
 ```

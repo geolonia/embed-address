@@ -1,11 +1,3 @@
-type FormRenderOptions = {
-  geolocationButtonLabel: String;
-  prefectureLabel: String;
-  cityLabel: String;
-  smallAreaLabel: String;
-  otherAddressLabel: String;
-};
-
 type RenderedForms = {
   buttonGeolocation: HTMLButtonElement;
   selectPrefCode: HTMLSelectElement;
@@ -17,14 +9,6 @@ type RenderedForms = {
   inputIsSmallAreaException: HTMLInputElement;
   spanErrorMessage: HTMLSpanElement;
   parentalForm: HTMLFormElement | null;
-};
-
-const defaultFormRenderOptions: FormRenderOptions = {
-  geolocationButtonLabel: "現在地から住所を入力",
-  prefectureLabel: "都道府県",
-  cityLabel: "市区町村",
-  smallAreaLabel: "大字町丁目",
-  otherAddressLabel: "その他の住所",
 };
 
 export const appendSelectOptions = (
@@ -77,13 +61,8 @@ export const removeOptions = (
   });
 };
 
-export const renderForms = (
-  target: HTMLElement,
-  _options: Partial<FormRenderOptions> = defaultFormRenderOptions
-) => {
+export const renderForms = (target: HTMLElement, options: Geolonia.Options) => {
   return new Promise<RenderedForms>((resolve) => {
-    const options = { ...defaultFormRenderOptions, ..._options };
-
     target.className += (target.className ? " " : "") + "geolonia_address_wrap";
     const button_geolocation_id = "geolonia-reverse-geocode-button";
     const select_pref_code_id = "geolonia-pref-code";
@@ -96,6 +75,7 @@ export const renderForms = (
     const input_other_address_id = "geolonia-other-address";
     const span_error_message_id = "geolonia-error-message";
 
+    // XSS OK for options
     target.innerHTML += `
     <button type="button" id="${button_geolocation_id}">${options.geolocationButtonLabel}</button>
     <div class="geolonia_pref">
@@ -103,7 +83,7 @@ export const renderForms = (
       <select class="geolonia_pref_select" id="${select_pref_code_id}" disabled>
         <option selected disabled>-</option>
       </select>
-      <input type="hidden" id="${input_pref_name_id}" name="prefecture" />
+      <input type="hidden" id="${input_pref_name_id}" name="${options.prefectureName}" />
     </div>
 
     <div class="geolonia_city">
@@ -111,19 +91,19 @@ export const renderForms = (
       <select class="geolonia_city_select" id="${select_city_code_id}" disabled>
             <option selected disabled>-</option>
       </select>
-      <input type="hidden" id="${input_city_name_id}" name="city" />
+      <input type="hidden" id="${input_city_name_id}" name="${options.cityName}" />
     </div>
 
     <div class="geolonia_small_area">
       <label class="geolonia_small_area_label" for="${input_small_area_id}">${options.smallAreaLabel}</label>
-      <input class="geolonia_small_area_input" type="text" id="${input_small_area_id}" list="${datalist_small_area_id}" name="small-area"></select>
+      <input class="geolonia_small_area_input" type="text" id="${input_small_area_id}" list="${datalist_small_area_id}" name="${options.smallAreaName}"></select>
       <datalist id="${datalist_small_area_id}"></datalist>
       <input type="hidden" id=${input_is_exception_id} name="is-exception" />
     </div>
 
     <div class="geolonia_other_address">
       <label class="geolonia_other_address_label" for="${input_other_address_id}">${options.otherAddressLabel}</label>
-      <input class="geolonia_ither_address_input" type="text" id="${input_other_address_id}" name="other-address"></select>
+      <input class="geolonia_ither_address_input" type="text" id="${input_other_address_id}" name="${options.otherAddressName}"></select>
     </div>
 
     <div class="geolonia_error"><span id="${span_error_message_id}" /></div>

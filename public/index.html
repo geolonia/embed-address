@@ -4,15 +4,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>住所簡単入力 API</title>
+    <style>
+      .form {
+        padding: 1em;
+        max-width: 760px;
+        border: 1px solid green;
+      }
+      #address {
+        margin-bottom: 1em;
+      }
+      .button-submit {
+      }
+    </style>
   </head>
   <body>
     <h1>住所簡単入力 API</h1>
     <p>
       住所簡単入力 API は、住所を簡単に入力することができるフォームパーツです。
     </p>
-    <form action="./">
-      <div id="address" data-geolocation-button-label="&lt;/button&gt;"></div>
-      <button type="submit">送信</button>
+
+    <form class="form" action="./">
+      <h3>住所入力フォーム</h3>
+      <div id="address"></div>
+      <button class="button-submit" type="submit">送信</button>
     </form>
     <script src="./bundle.js?geolonia-api-key=YOUR-API-KEY"></script>
   </body>

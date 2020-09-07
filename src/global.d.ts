@@ -38,15 +38,31 @@ declare namespace Geolonia {
       S_NAME: string | null;
     };
   }
-  export type Options = {
+  export type FormRenderOptions = {
     geolocationButtonLabel: string;
     prefectureLabel: string;
     cityLabel: string;
     smallAreaLabel: string;
     otherAddressLabel: string;
     prefectureName: string;
+    prefCodeName: string;
     cityName: string;
+    cityCodeName: string;
     smallAreaName: string;
+    isSmallAreaExceptionName: string;
     otherAddressName: string;
+  };
+
+  type RenderedForms = {
+    buttonGeolocation: HTMLButtonElement;
+    selectPrefCode: HTMLSelectElement;
+    inputPrefName: HTMLInputElement;
+    selectCityCode: HTMLSelectElement;
+    inputCityName: HTMLInputElement;
+    inputSmallArea: HTMLInputElement;
+    datalistSmallArea: HTMLDataListElement;
+    inputIsSmallAreaException: HTMLInputElement;
+    spanErrorMessage: HTMLSpanElement;
+    parentalForm: HTMLFormElement | null;
   };
 }

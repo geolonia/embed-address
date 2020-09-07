@@ -5,9 +5,8 @@
   "main": "docs/bundle.js",
   "private": true,
   "scripts": {
-    "start": "webpack-dev-server --config webpack.config.demo.js",
-    "build": "webpack -p",
-    "build:demo": "webpack -p --config webpack.config.demo.js",
+    "start": "webpack-dev-server",
+    "build": "webpack",
     "test": "jest"
   },
   "repository": {

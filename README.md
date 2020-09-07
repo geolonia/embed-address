@@ -16,7 +16,7 @@ form 要素の内部など、簡単入力フォームを配置したい場所に
 </body>
 ```
 
-次のデータがサーバーに送信されます。
+デフォルトの設定では次のフォームデータがユーザーのサーバーに POST されます。
 
 - `prefecture`: 都道府県名
 - `city`: 市区町村名
@@ -24,7 +24,7 @@ form 要素の内部など、簡単入力フォームを配置したい場所に
 - `other-address`: 上記以外の住所
 - `is-exception`: 大字町丁目名がプルダウンの候補に存在しない場合は `"true"`、存在する場合は `"false"`
 
-`window.geolonia.address` をコールすることで `id="address"` 以外の ID を持つ要素に対して簡単入力フォームを配置できます。
+`window.geolonia.address` をコールすることで `id="address"` 以外の `id` を持つ要素に対して簡単入力フォームを配置できます。
 
 ```html
 <body>
@@ -41,7 +41,7 @@ form 要素の内部など、簡単入力フォームを配置したい場所に
 
 ### カスタマイズ
 
-`<label>`要素のテキストやフォームの `name` 属性をカスタマイズできます。
+`placeholder` 属性のテキストやフォームの `name` 属性をカスタマイズできます。
 
 ```html
 <div
@@ -54,6 +54,7 @@ form 要素の内部など、簡単入力フォームを配置したい場所に
   data-prefecture-name="prefecture"
   data-city-name="city"
   data-small-area-name="small-area"
+  data-is-small-area-exception-name="is-exception"
   data-other-address-name="other-address"
 ></div>
 ```

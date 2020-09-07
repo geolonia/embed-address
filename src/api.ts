@@ -2,8 +2,9 @@ import { defaultAtts } from "./util";
 
 const AddressAPIBase = "https://cdn.geolonia.com/address";
 const reverseGeocodeAPIBase = "https://api.geolonia.com/dev/reverseGeocode";
+const geoloniaEndpoint = "./"; // TODO: fix me
 
-export const fetchAddresses = async <T>(path: string) => {
+const fetchAddresses = async <T>(path: string) => {
   try {
     const data = await fetch(`${AddressAPIBase}/${path}`).then((res) => {
       if (res.status > 299) {
@@ -18,6 +19,12 @@ export const fetchAddresses = async <T>(path: string) => {
     return null;
   }
 };
+
+export const fetchPrefs = () => fetchAddresses<Geolonia.API.Pref>("japan.json");
+export const fetchCities = (prefCode: string) =>
+  fetchAddresses<Geolonia.API.City>(`japan/${prefCode}.json`);
+export const fetchSmallAreas = (prefCode: string, cityCode: string) =>
+  fetchAddresses<Geolonia.API.SmallArea>(`japan/${prefCode}/${cityCode}.json`);
 
 export const fetchReverseGeocode = async (lng: number, lat: number) => {
   try {
@@ -39,14 +46,17 @@ export const fetchReverseGeocode = async (lng: number, lat: number) => {
 
 export const sendToGeolonia = (
   { formData, lat, lng }: { formData: FormData; lat: number; lng: number },
-  options: Geolonia.Options
+  options: Geolonia.FormRenderOptions
 ) => {
   const newFormData = new FormData();
+  newFormData.set(defaultAtts.prefCodeName, formData.get(options.prefCodeName));
   newFormData.set(
     defaultAtts.prefectureName,
     formData.get(options.prefectureName)
   );
   newFormData.set(defaultAtts.cityName, formData.get(options.cityName));
+  newFormData.set(defaultAtts.cityCodeName, formData.get(options.cityCodeName));
+
   newFormData.set(
     defaultAtts.smallAreaName,
     formData.get(options.smallAreaName)
@@ -55,12 +65,12 @@ export const sendToGeolonia = (
     defaultAtts.otherAddressName,
     formData.get(options.otherAddressName)
   );
-  newFormData.set("is-exception", formData.get("is-exception"));
+  newFormData.set(
+    defaultAtts.isSmallAreaExceptionName,
+    formData.get(options.isSmallAreaExceptionName)
+  );
   newFormData.set("lat", lat.toString());
   newFormData.set("lng", lng.toString());
 
-  fetch("path/to/geolonia/server", {
-    method: "POST",
-    body: newFormData,
-  });
+  fetch(geoloniaEndpoint, { method: "POST", body: newFormData });
 };

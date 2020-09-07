@@ -4,36 +4,21 @@ import {
   appendDatalistOptions,
   removeOptions,
 } from "./ui";
-import { fetchAddresses, fetchReverseGeocode, sendToGeolonia } from "./api";
-import { parseAtts } from "./util";
-
-const getCurrentPosition = () => {
-  return new Promise<{ lat: number; lng: number }>((resolve, reject) => {
-    window.navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude: lat, longitude: lng } = pos.coords;
-        resolve({ lat, lng });
-      },
-      (error) => reject(error)
-    );
-  });
-};
+import {
+  fetchPrefs,
+  fetchCities,
+  fetchSmallAreas,
+  fetchReverseGeocode,
+  sendToGeolonia,
+} from "./api";
+import { parseAtts, getCurrentPosition, identifyTarget } from "./util";
 
 /**
  * render Forms
  * @param targetItem target container
  */
-const address = async (targetItem: HTMLElement | string) => {
-  let target: HTMLElement;
-  if (targetItem instanceof HTMLElement) {
-    target = targetItem;
-  } else {
-    target = document.getElementById(targetItem);
-  }
-  if (!target) {
-    throw new Error("no target found.");
-  }
-
+const main = async (targetIdentifier: HTMLElement | string) => {
+  const target = identifyTarget(targetIdentifier);
   const options = parseAtts(target);
 
   // state for those select element
@@ -42,24 +27,23 @@ const address = async (targetItem: HTMLElement | string) => {
   let prefCode: string = "";
   let cityCode: string = "";
 
-  const [
-    {
-      buttonGeolocation,
-      selectPrefCode,
-      inputPrefName,
-      selectCityCode,
-      inputCityName,
-      inputSmallArea,
-      datalistSmallArea,
-      inputIsSmallAreaException,
-      spanErrorMessage,
-      parentalForm,
-    },
-    prefectures,
-  ] = await Promise.all([
+  const [elements, prefectures] = await Promise.all([
     renderForms(target, options),
-    fetchAddresses<Geolonia.API.Pref>("japan.json"),
+    fetchPrefs(),
   ]);
+
+  const {
+    buttonGeolocation,
+    selectPrefCode,
+    inputPrefName,
+    selectCityCode,
+    inputCityName,
+    inputSmallArea,
+    datalistSmallArea,
+    inputIsSmallAreaException,
+    spanErrorMessage,
+    parentalForm,
+  } = elements;
 
   if (!prefectures) {
     spanErrorMessage.innerText =
@@ -89,11 +73,12 @@ const address = async (targetItem: HTMLElement | string) => {
     const { PREF, CITY, S_NAME } = data;
     prefCode = PREF;
     cityCode = PREF + CITY;
+
+    // onPrefSelect(({ target: { value: prefCode } } as unknown) as Event);
+
     const [cities, smallAreas] = await Promise.all([
-      fetchAddresses<Geolonia.API.City>(`japan/${prefCode}.json`),
-      fetchAddresses<Geolonia.API.SmallArea>(
-        `japan/${prefCode}/${cityCode}.json`
-      ),
+      fetchCities(prefCode),
+      fetchSmallAreas(prefCode, cityCode),
     ]);
 
     if (!cities || !smallAreas) {
@@ -119,6 +104,7 @@ const address = async (targetItem: HTMLElement | string) => {
       removeOptions(selectCityCode),
       removeOptions(datalistSmallArea),
     ]);
+
     await Promise.all([
       appendSelectOptions(
         selectCityCode,
@@ -144,14 +130,11 @@ const address = async (targetItem: HTMLElement | string) => {
     "都道府県コード",
     "都道府県名"
   );
-  selectPrefCode.disabled = false;
 
-  selectPrefCode.addEventListener("change", async (event) => {
+  const onPrefSelect = async (event: Event) => {
     if (event.target instanceof HTMLSelectElement) {
       prefCode = event.target.value;
-      const cities = await fetchAddresses<Geolonia.API.City>(
-        `japan/${prefCode}.json`
-      );
+      const cities = await fetchCities(prefCode);
 
       if (!cities) {
         if (!prefectures) {
@@ -171,16 +154,15 @@ const address = async (targetItem: HTMLElement | string) => {
         "市区町村コード",
         "市区町村名"
       );
-      selectCityCode.disabled = false;
     }
-  });
+  };
+
+  selectPrefCode.addEventListener("change", onPrefSelect);
 
   selectCityCode.addEventListener("change", async (event) => {
     if (event.target instanceof HTMLSelectElement) {
       cityCode = event.target.value;
-      const smallAreas = await fetchAddresses<Geolonia.API.SmallArea>(
-        `japan/${prefCode}/${cityCode}.json`
-      );
+      const smallAreas = await fetchSmallAreas(prefCode, cityCode);
 
       if (!smallAreas) {
         if (!prefectures) {
@@ -215,18 +197,18 @@ const address = async (targetItem: HTMLElement | string) => {
 // render automatically if #address exists
 const entry = document.getElementById("address");
 if (entry) {
-  address(entry);
+  main(entry);
 }
 
 // make global variables
 declare global {
   interface Window {
     geolonia?: {
-      address?: (target: HTMLElement | string) => void;
+      address?: typeof main;
     };
   }
 }
 if (!window.geolonia) {
   window.geolonia = {};
 }
-window.geolonia.address = address;
+window.geolonia.address = main;

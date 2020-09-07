@@ -1,16 +1,3 @@
-type RenderedForms = {
-  buttonGeolocation: HTMLButtonElement;
-  selectPrefCode: HTMLSelectElement;
-  inputPrefName: HTMLInputElement;
-  selectCityCode: HTMLSelectElement;
-  inputCityName: HTMLInputElement;
-  inputSmallArea: HTMLInputElement;
-  datalistSmallArea: HTMLDataListElement;
-  inputIsSmallAreaException: HTMLInputElement;
-  spanErrorMessage: HTMLSpanElement;
-  parentalForm: HTMLFormElement | null;
-};
-
 export const appendSelectOptions = (
   target: HTMLSelectElement,
   options: any[],
@@ -51,7 +38,7 @@ export const removeOptions = (
   return new Promise((resolve) => {
     [...target.children].forEach((child) => {
       const option = child as HTMLOptionElement;
-      if (option.innerHTML !== "-") {
+      if ((option.dataset || {}).isPlaceholder !== "true") {
         option.remove();
       } else {
         option.selected = true;
@@ -61,8 +48,11 @@ export const removeOptions = (
   });
 };
 
-export const renderForms = (target: HTMLElement, options: Geolonia.Options) => {
-  return new Promise<RenderedForms>((resolve) => {
+export const renderForms = (
+  target: HTMLElement,
+  options: Geolonia.FormRenderOptions
+) => {
+  return new Promise<Geolonia.RenderedForms>((resolve) => {
     target.className += (target.className ? " " : "") + "geolonia_address_wrap";
     const button_geolocation_id = "geolonia-reverse-geocode-button";
     const select_pref_code_id = "geolonia-pref-code";
@@ -77,37 +67,79 @@ export const renderForms = (target: HTMLElement, options: Geolonia.Options) => {
 
     // XSS OK for the options
     target.innerHTML += `
-    <button type="button" id="${button_geolocation_id}">${options.geolocationButtonLabel}</button>
-    <div class="geolonia_pref">
-      <label class="geolonia_pref_label" for="${select_pref_code_id}">${options.prefectureLabel}</label>
-      <select class="geolonia_pref_select" id="${select_pref_code_id}" disabled>
-        <option selected disabled>-</option>
-      </select>
-      <input type="hidden" id="${input_pref_name_id}" name="${options.prefectureName}" />
-    </div>
+    <button
+      id="${button_geolocation_id}"
+      type="button"
+    >${options.geolocationButtonLabel}</button>
 
-    <div class="geolonia_city">
-      <label class="geolonia_city_label" for="${select_city_code_id}">${options.cityLabel}</label>
-      <select class="geolonia_city_select" id="${select_city_code_id}" disabled>
-            <option selected disabled>-</option>
-      </select>
-      <input type="hidden" id="${input_city_name_id}" name="${options.cityName}" />
-    </div>
+    <select
+      id="${select_pref_code_id}"
+      name="${options.prefCodeName}"
+      class="geolonia_pref_select"
+      disabled
+    >
+      <option
+        data-is-placeholder="true"
+        selected
+        disabled
+      >${options.prefectureLabel}</option>
+    </select>
 
-    <div class="geolonia_small_area">
-      <label class="geolonia_small_area_label" for="${input_small_area_id}">${options.smallAreaLabel}</label>
-      <input class="geolonia_small_area_input" type="text" id="${input_small_area_id}" list="${datalist_small_area_id}" name="${options.smallAreaName}"></select>
-      <datalist id="${datalist_small_area_id}"></datalist>
-      <input type="hidden" id=${input_is_exception_id} name="is-exception" />
-    </div>
+    <input
+      id="${input_pref_name_id}"
+      name="${options.prefectureName}"
+      type="hidden"
+    />
 
-    <div class="geolonia_other_address">
-      <label class="geolonia_other_address_label" for="${input_other_address_id}">${options.otherAddressLabel}</label>
-      <input class="geolonia_ither_address_input" type="text" id="${input_other_address_id}" name="${options.otherAddressName}"></select>
-    </div>
+    <select
+      id="${select_city_code_id}"
+      name="${options.cityCodeName}"
+      class="geolonia_city_select"
+      disabled
+    >
+      <option
+        data-is-placeholder="true"
+        selected
+        disabled
+      >${options.cityLabel}</option>
+    </select>
 
-    <div class="geolonia_error"><span id="${span_error_message_id}" /></div>
+    <input
+      id="${input_city_name_id}"
+      name="${options.cityName}"
+      type="hidden"
+    />
+
+    <input
+      id="${input_small_area_id}"
+      name="${options.smallAreaName}"
+      class="geolonia_small_area_input"
+      type="text"
+      list="${datalist_small_area_id}"
+      placeholder="${options.smallAreaLabel}"
+    />
+
+    <datalist id="${datalist_small_area_id}"></datalist>
+
+    <input
+      id=${input_is_exception_id}
+      name="${options.isSmallAreaExceptionName}"
+      type="hidden"
+    />
+
+    <input
+      id="${input_other_address_id}"
+      name="${options.otherAddressName}"
+      class="geolonia_ither_address_input"
+      type="text"
+      placeholder="${options.otherAddressLabel}"
+    />
+
+    <div class="geolonia_error">
+      <span id="${span_error_message_id}" />
+    </div>
   `;
+
     const buttonGeolocation = document.getElementById(
       button_geolocation_id
     ) as HTMLButtonElement;

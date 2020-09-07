@@ -47,6 +47,7 @@ form 要素の内部など、簡単入力フォームを配置したい場所に
 <div
   id="address"
   data-geolocation-button-label="現在位置から住所を入力"
+  data-geolocating-label="ロード中..."
   data-prefecture-label="都道府県"
   data-city-label="市区町村"
   data-small-area-label="大字町丁目"

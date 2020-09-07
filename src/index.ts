@@ -22,8 +22,8 @@ const main = async (targetIdentifier: HTMLElement | string) => {
   const options = parseAtts(target);
 
   // state for those select element
-  let lat: number;
-  let lng: number;
+  let lat: number = NaN;
+  let lng: number = NaN;
   let prefCode: string = "";
   let cityCode: string = "";
 
@@ -51,19 +51,29 @@ const main = async (targetIdentifier: HTMLElement | string) => {
     return;
   }
 
+  await appendSelectOptions(
+    selectPrefCode,
+    prefectures,
+    "都道府県コード",
+    "都道府県名"
+  );
+
   buttonGeolocation.addEventListener("click", async () => {
+    buttonGeolocation.innerText = options.geolocatingLabel;
     try {
       const position = await getCurrentPosition();
       lat = position.lat;
       lng = position.lng;
     } catch (error) {
       console.error(error);
+      buttonGeolocation.innerText = options.geolocationButtonLabel;
       spanErrorMessage.innerText = "現在位置から住所を取得できませんでした。";
       return;
     }
 
     const data = await fetchReverseGeocode(lng, lat);
     if (!data) {
+      buttonGeolocation.innerText = options.geolocationButtonLabel;
       spanErrorMessage.innerText =
         "何かのエラーです。現在位置から住所を取得できませんでした。";
       return;
@@ -74,19 +84,16 @@ const main = async (targetIdentifier: HTMLElement | string) => {
     prefCode = PREF;
     cityCode = PREF + CITY;
 
-    // onPrefSelect(({ target: { value: prefCode } } as unknown) as Event);
-
     const [cities, smallAreas] = await Promise.all([
       fetchCities(prefCode),
       fetchSmallAreas(prefCode, cityCode),
     ]);
 
     if (!cities || !smallAreas) {
-      if (!prefectures) {
-        spanErrorMessage.innerText =
-          "何かのエラーです。住所データを取得できませんでした。";
-        return;
-      }
+      buttonGeolocation.innerText = options.geolocationButtonLabel;
+      spanErrorMessage.innerText =
+        "何かのエラーです。住所データを取得できませんでした。";
+      return;
     }
 
     const prefecture = prefectures.find(
@@ -122,28 +129,18 @@ const main = async (targetIdentifier: HTMLElement | string) => {
     )
       ? "false"
       : "true";
+    buttonGeolocation.innerText = options.geolocationButtonLabel;
   });
-
-  await appendSelectOptions(
-    selectPrefCode,
-    prefectures,
-    "都道府県コード",
-    "都道府県名"
-  );
 
   const onPrefSelect = async (event: Event) => {
     if (event.target instanceof HTMLSelectElement) {
       prefCode = event.target.value;
       const cities = await fetchCities(prefCode);
-
       if (!cities) {
-        if (!prefectures) {
-          spanErrorMessage.innerText =
-            "何かのエラーです。住所データを取得できませんでした。";
-          return;
-        }
+        spanErrorMessage.innerText =
+          "何かのエラーです。住所データを取得できませんでした。";
+        return;
       }
-
       await Promise.all([
         removeOptions(selectCityCode),
         removeOptions(datalistSmallArea),
@@ -157,21 +154,15 @@ const main = async (targetIdentifier: HTMLElement | string) => {
     }
   };
 
-  selectPrefCode.addEventListener("change", onPrefSelect);
-
-  selectCityCode.addEventListener("change", async (event) => {
+  const onCitySelect = async (event: Event) => {
     if (event.target instanceof HTMLSelectElement) {
       cityCode = event.target.value;
       const smallAreas = await fetchSmallAreas(prefCode, cityCode);
-
       if (!smallAreas) {
-        if (!prefectures) {
-          spanErrorMessage.innerText =
-            "何かのエラーです。住所データを取得できませんでした。";
-          return;
-        }
+        spanErrorMessage.innerText =
+          "何かのエラーです。住所データを取得できませんでした。";
+        return;
       }
-
       await removeOptions(datalistSmallArea);
       await appendDatalistOptions(
         datalistSmallArea,
@@ -179,12 +170,19 @@ const main = async (targetIdentifier: HTMLElement | string) => {
         "大字町丁目名"
       );
     }
-  });
+  };
+
+  selectPrefCode.addEventListener("change", onPrefSelect);
+  selectCityCode.addEventListener("change", onCitySelect);
 
   // send to Geolonia
   if (parentalForm) {
     parentalForm.addEventListener("submit", (event) => {
-      if (event.target instanceof HTMLFormElement && lat && lng) {
+      if (
+        event.target instanceof HTMLFormElement &&
+        !Number.isNaN(lat) &&
+        !Number.isNaN(lng)
+      ) {
         sendToGeolonia(
           { formData: new FormData(event.target), lat, lng },
           options

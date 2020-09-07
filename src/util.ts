@@ -1,5 +1,6 @@
-export const defaultAtts = {
+export const defaultAtts: Geolonia.FormRenderOptions = {
   geolocationButtonLabel: "現在地から住所を入力",
+  geolocatingLabel: "ロード中...",
   prefectureLabel: "都道府県",
   cityLabel: "市区町村",
   smallAreaLabel: "大字町丁目",

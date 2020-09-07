@@ -40,6 +40,7 @@ declare namespace Geolonia {
   }
   export type FormRenderOptions = {
     geolocationButtonLabel: string;
+    geolocatingLabel: string;
     prefectureLabel: string;
     cityLabel: string;
     smallAreaLabel: string;
@@ -51,18 +52,5 @@ declare namespace Geolonia {
     smallAreaName: string;
     isSmallAreaExceptionName: string;
     otherAddressName: string;
-  };
-
-  type RenderedForms = {
-    buttonGeolocation: HTMLButtonElement;
-    selectPrefCode: HTMLSelectElement;
-    inputPrefName: HTMLInputElement;
-    selectCityCode: HTMLSelectElement;
-    inputCityName: HTMLInputElement;
-    inputSmallArea: HTMLInputElement;
-    datalistSmallArea: HTMLDataListElement;
-    inputIsSmallAreaException: HTMLInputElement;
-    spanErrorMessage: HTMLSpanElement;
-    parentalForm: HTMLFormElement | null;
   };
 }

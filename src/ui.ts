@@ -52,21 +52,20 @@ export const renderForms = (
   target: HTMLElement,
   options: Geolonia.FormRenderOptions
 ) => {
-  return new Promise<Geolonia.RenderedForms>((resolve) => {
-    target.className += (target.className ? " " : "") + "geolonia_address_wrap";
-    const button_geolocation_id = "geolonia-reverse-geocode-button";
-    const select_pref_code_id = "geolonia-pref-code";
-    const input_pref_name_id = "geolonia-prefecture-name";
-    const select_city_code_id = "geolonia-city-code";
-    const input_city_name_id = "geolonia-city-name";
-    const input_small_area_id = "geolonia-small-area";
-    const datalist_small_area_id = "geolonia-small-area-datalist";
-    const input_is_exception_id = "geolonia-small-area-is-exception";
-    const input_other_address_id = "geolonia-other-address";
-    const span_error_message_id = "geolonia-error-message";
+  target.className += (target.className ? " " : "") + "geolonia_address_wrap";
+  const button_geolocation_id = "geolonia-reverse-geocode-button";
+  const select_pref_code_id = "geolonia-pref-code";
+  const input_pref_name_id = "geolonia-prefecture-name";
+  const select_city_code_id = "geolonia-city-code";
+  const input_city_name_id = "geolonia-city-name";
+  const input_small_area_id = "geolonia-small-area";
+  const datalist_small_area_id = "geolonia-small-area-datalist";
+  const input_is_exception_id = "geolonia-small-area-is-exception";
+  const input_other_address_id = "geolonia-other-address";
+  const span_error_message_id = "geolonia-error-message";
 
-    // XSS OK for the options
-    target.innerHTML += `
+  // XSS OK for the options
+  target.innerHTML += `
     <button
       id="${button_geolocation_id}"
       type="button"
@@ -140,99 +139,98 @@ export const renderForms = (
     </div>
   `;
 
-    const buttonGeolocation = document.getElementById(
-      button_geolocation_id
-    ) as HTMLButtonElement;
-    const selectPrefCode = document.querySelector<HTMLSelectElement>(
-      `#${select_pref_code_id}`
-    );
-    const inputPrefName = document.querySelector<HTMLInputElement>(
-      `#${input_pref_name_id}`
-    );
-    const selectCityCode = document.querySelector<HTMLSelectElement>(
-      `#${select_city_code_id}`
-    );
-    const inputCityName = document.querySelector<HTMLInputElement>(
-      `#${input_city_name_id}`
-    );
-    const inputSmallArea = document.querySelector<HTMLInputElement>(
-      `#${input_small_area_id}`
-    );
-    const datalistSmallArea = document.querySelector<HTMLDataListElement>(
-      `#${datalist_small_area_id}`
-    );
-    const inputIsSmallAreaException = document.querySelector<HTMLInputElement>(
-      `#${input_is_exception_id}`
-    );
-    const inputOtherAddress = document.querySelector<HTMLInputElement>(
-      `#${input_other_address_id}`
-    );
-    const spanErrorMessage = document.querySelector<HTMLSpanElement>(
-      `#${span_error_message_id}`
-    );
-    const parentalForm = target.closest("form");
+  const buttonGeolocation = document.getElementById(
+    button_geolocation_id
+  ) as HTMLButtonElement;
+  const selectPrefCode = document.querySelector<HTMLSelectElement>(
+    `#${select_pref_code_id}`
+  );
+  const inputPrefName = document.querySelector<HTMLInputElement>(
+    `#${input_pref_name_id}`
+  );
+  const selectCityCode = document.querySelector<HTMLSelectElement>(
+    `#${select_city_code_id}`
+  );
+  const inputCityName = document.querySelector<HTMLInputElement>(
+    `#${input_city_name_id}`
+  );
+  const inputSmallArea = document.querySelector<HTMLInputElement>(
+    `#${input_small_area_id}`
+  );
+  const datalistSmallArea = document.querySelector<HTMLDataListElement>(
+    `#${datalist_small_area_id}`
+  );
+  const inputIsSmallAreaException = document.querySelector<HTMLInputElement>(
+    `#${input_is_exception_id}`
+  );
+  const inputOtherAddress = document.querySelector<HTMLInputElement>(
+    `#${input_other_address_id}`
+  );
+  const spanErrorMessage = document.querySelector<HTMLSpanElement>(
+    `#${span_error_message_id}`
+  );
+  const parentalForm = target.closest("form");
 
-    selectPrefCode.addEventListener("change", (event) => {
-      if (event.target instanceof HTMLSelectElement) {
-        spanErrorMessage.innerText = "";
-        const prefCode = event.target.value;
-        const options = [
-          ...document.querySelectorAll<HTMLOptionElement>(
-            `#${select_pref_code_id} option`
-          ),
-        ];
-        const option = options.find((option) => option.value === prefCode);
-        if (option) {
-          inputPrefName.value = option.innerText;
-        }
-      }
-    });
-
-    selectCityCode.addEventListener("change", (event) => {
-      if (event.target instanceof HTMLSelectElement) {
-        spanErrorMessage.innerText = "";
-        const cityCode = event.target.value;
-        const options = [
-          ...document.querySelectorAll<HTMLOptionElement>(
-            `#${select_city_code_id} option`
-          ),
-        ];
-        const option = options.find((option) => option.value === cityCode);
-        if (option) {
-          inputCityName.value = option.innerText;
-        }
-      }
-    });
-
-    inputSmallArea.addEventListener("change", (event) => {
-      if (event.target instanceof HTMLInputElement) {
-        spanErrorMessage.innerText = "";
-        const smallAreaName = event.target.value;
-        const options = [
-          ...document.querySelectorAll<HTMLOptionElement>(
-            `#${datalist_small_area_id} option`
-          ),
-        ];
-        const option = options.find((option) => option.value === smallAreaName);
-        inputIsSmallAreaException.value = option ? "false" : "true";
-      }
-    });
-
-    inputOtherAddress.addEventListener("change", (event) => {
+  selectPrefCode.addEventListener("change", (event) => {
+    if (event.target instanceof HTMLSelectElement) {
       spanErrorMessage.innerText = "";
-    });
-
-    resolve({
-      buttonGeolocation,
-      selectPrefCode,
-      inputPrefName,
-      selectCityCode,
-      inputCityName,
-      inputSmallArea,
-      datalistSmallArea,
-      inputIsSmallAreaException,
-      spanErrorMessage,
-      parentalForm,
-    });
+      const prefCode = event.target.value;
+      const options = [
+        ...document.querySelectorAll<HTMLOptionElement>(
+          `#${select_pref_code_id} option`
+        ),
+      ];
+      const option = options.find((option) => option.value === prefCode);
+      if (option) {
+        inputPrefName.value = option.innerText;
+      }
+    }
   });
+
+  selectCityCode.addEventListener("change", (event) => {
+    if (event.target instanceof HTMLSelectElement) {
+      spanErrorMessage.innerText = "";
+      const cityCode = event.target.value;
+      const options = [
+        ...document.querySelectorAll<HTMLOptionElement>(
+          `#${select_city_code_id} option`
+        ),
+      ];
+      const option = options.find((option) => option.value === cityCode);
+      if (option) {
+        inputCityName.value = option.innerText;
+      }
+    }
+  });
+
+  inputSmallArea.addEventListener("change", (event) => {
+    if (event.target instanceof HTMLInputElement) {
+      spanErrorMessage.innerText = "";
+      const smallAreaName = event.target.value;
+      const options = [
+        ...document.querySelectorAll<HTMLOptionElement>(
+          `#${datalist_small_area_id} option`
+        ),
+      ];
+      const option = options.find((option) => option.value === smallAreaName);
+      inputIsSmallAreaException.value = option ? "false" : "true";
+    }
+  });
+
+  inputOtherAddress.addEventListener("change", (event) => {
+    spanErrorMessage.innerText = "";
+  });
+
+  return {
+    buttonGeolocation,
+    selectPrefCode,
+    inputPrefName,
+    selectCityCode,
+    inputCityName,
+    inputSmallArea,
+    datalistSmallArea,
+    inputIsSmallAreaException,
+    spanErrorMessage,
+    parentalForm,
+  };
 };

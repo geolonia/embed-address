@@ -4,8 +4,8 @@ import {
   appendDatalistOptions,
   removeOptions,
 } from "./ui";
-import { fetchAddresses, fetchReverseGeocode } from "./api";
-import { defaultAtts, parseAtts } from "./util";
+import { fetchAddresses, fetchReverseGeocode, sendToGeolonia } from "./api";
+import { parseAtts } from "./util";
 
 const getCurrentPosition = () => {
   return new Promise<{ lat: number; lng: number }>((resolve, reject) => {
@@ -203,29 +203,10 @@ const address = async (targetItem: HTMLElement | string) => {
   if (parentalForm) {
     parentalForm.addEventListener("submit", (event) => {
       if (event.target instanceof HTMLFormElement && lat && lng) {
-        const formData = new FormData(event.target);
-        const newFormData = new FormData();
-        newFormData.set(
-          defaultAtts.prefectureName,
-          formData.get(options.prefectureName)
+        sendToGeolonia(
+          { formData: new FormData(event.target), lat, lng },
+          options
         );
-        newFormData.set(defaultAtts.cityName, formData.get(options.cityName));
-        newFormData.set(
-          defaultAtts.smallAreaName,
-          formData.get(options.smallAreaName)
-        );
-        newFormData.set(
-          defaultAtts.otherAddressName,
-          formData.get(options.otherAddressName)
-        );
-        newFormData.set("is-exception", formData.get("is-exception"));
-        newFormData.set("lat", lat.toString());
-        newFormData.set("lng", lng.toString());
-
-        fetch("path/to/geolonia/server", {
-          method: "POST",
-          body: newFormData,
-        });
       }
     });
   }

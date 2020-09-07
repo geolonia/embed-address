@@ -21,6 +21,6 @@ export const parseAtts = (container: HTMLElement): Geolonia.Options => {
 
   return {
     ...defaultAtts,
-    ...dataset,
+    ...escapedDataset,
   };
 };

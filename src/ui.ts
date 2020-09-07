@@ -75,7 +75,7 @@ export const renderForms = (target: HTMLElement, options: Geolonia.Options) => {
     const input_other_address_id = "geolonia-other-address";
     const span_error_message_id = "geolonia-error-message";
 
-    // XSS OK for options
+    // XSS OK for the options
     target.innerHTML += `
     <button type="button" id="${button_geolocation_id}">${options.geolocationButtonLabel}</button>
     <div class="geolonia_pref">

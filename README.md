@@ -9,18 +9,41 @@ form 要素の内部など、簡単入力フォームを配置したい場所に
 ```html
 <body>
   <form>
-    <div id="address" />
+    <div id="address"></div>
     <button type="submit">送信</button>
   </form>
   <script src="https://api.geolonia.com/address-input?geolonia-api-key=YOUR-API-KEY"></script>
 </body>
 ```
 
+次のデータがサーバーに送信されます。
+
+- `prefecture`: 都道府県名
+- `city`: 市区町村名
+- `small-area`: 大字町丁目名
+- `other-address`: 上記以外の住所
+- `is-exception`: 大字町丁目名がプルダウンの候補に存在しない場合は `"true"`、存在する場合は `"false"`
+
+`window.geolonia.address` をコールすることで `id="address"` 以外の ID を持つ要素に対して簡単入力フォームを配置できます。
+
+```html
+<body>
+  <form>
+    <div id="my-custom-address"></div>
+    <button type="submit">送信</button>
+  </form>
+  <script src="https://api.geolonia.com/address-input?geolonia-api-key=YOUR-API-KEY"></script>
+  <script>
+    window.geolonia.address("my-custom-address");
+  </script>
+</body>
+```
+
 ### カスタマイズ
 
-`<label>`要素やフォームの `name` 属性をカスタマイズできます。
+`<label>`要素のテキストやフォームの `name` 属性をカスタマイズできます。
 
-```
+```html
 <div
   id="address"
   data-geolocation-button-label="現在位置から住所を入力"

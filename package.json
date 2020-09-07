@@ -8,7 +8,7 @@
     "start": "webpack-dev-server --config webpack.config.demo.js",
     "build": "webpack -p",
     "build:demo": "webpack -p --config webpack.config.demo.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -23,18 +23,16 @@
   "homepage": "https://github.com/geolonia/prototype-address-input-support#readme",
   "devDependencies": {
     "@types/html-webpack-plugin": "^3.2.3",
-    "css-loader": "^4.2.2",
+    "@types/jest": "^26.0.13",
     "html-webpack-plugin": "^4.3.0",
+    "jest": "^26.4.2",
     "node-sass": "^4.14.1",
-    "sass-loader": "^10.0.1",
-    "style-loader": "^1.2.1",
+    "ts-jest": "^26.3.0",
     "ts-loader": "^8.0.3",
     "typescript": "^4.0.2",
     "webpack": "^4.44.1",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.0"
   },
-  "dependencies": {
-    "bootstrap": "^4.5.2"
-  }
+  "dependencies": {}
 }

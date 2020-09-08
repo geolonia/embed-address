@@ -20,6 +20,8 @@ export const parseAtts = (
   const dataset = container.dataset || {};
 
   const keys = Object.keys(dataset);
+
+  // escape and prevent XSS
   const escapedDataset = keys.reduce<{ [key: string]: string }>((prev, key) => {
     prev[key] = escape(dataset[key]);
     return prev;
@@ -43,6 +45,7 @@ export const getCurrentPosition = () => {
   });
 };
 
+// convert HTMLElement id to HTMLElement
 export const identifyTarget = (targetIdentifier: HTMLElement | string) => {
   let target: HTMLElement;
   if (targetIdentifier instanceof HTMLElement) {

@@ -38,13 +38,15 @@ declare namespace Geolonia {
       S_NAME: string | null;
     };
   }
-  export type FormRenderOptions = {
+  export type FormRenderLabelOptions = {
     geolocationButtonLabel: string;
     geolocatingLabel: string;
     prefectureLabel: string;
     cityLabel: string;
     smallAreaLabel: string;
     otherAddressLabel: string;
+  };
+  export type FormRenderNameOptions = {
     prefectureName: string;
     prefCodeName: string;
     cityName: string;
@@ -53,4 +55,20 @@ declare namespace Geolonia {
     isSmallAreaExceptionName: string;
     otherAddressName: string;
   };
+  export type FormRenderOptions = FormRenderLabelOptions &
+    FormRenderNameOptions;
+
+  // Parsed Form Data
+  // [NOTE] The key value is duplicated with `utils.defaultAtts`
+  export interface SendingData {
+    prefecture: string;
+    "pref-code": string;
+    city: string;
+    "city-code": string;
+    "small-area": string;
+    "is-exception"?: boolean;
+    "other-address": string;
+    lat: number;
+    lng: number;
+  }
 }

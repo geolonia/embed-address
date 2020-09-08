@@ -45,32 +45,30 @@ export const fetchReverseGeocode = async (lng: number, lat: number) => {
 };
 
 export const sendToGeolonia = (
-  { formData, lat, lng }: { formData: FormData; lat: number; lng: number },
+  {
+    formData,
+    lat,
+    lng,
+  }: {
+    formData: FormData;
+    lat: number;
+    lng: number;
+  },
   options: Geolonia.FormRenderOptions
 ) => {
-  const newFormData = new FormData();
-  newFormData.set(defaultAtts.prefCodeName, formData.get(options.prefCodeName));
-  newFormData.set(
-    defaultAtts.prefectureName,
-    formData.get(options.prefectureName)
-  );
-  newFormData.set(defaultAtts.cityName, formData.get(options.cityName));
-  newFormData.set(defaultAtts.cityCodeName, formData.get(options.cityCodeName));
+  const body = JSON.stringify({
+    [defaultAtts.prefCodeName]: formData.get(options.prefCodeName),
+    [defaultAtts.prefectureName]: formData.get(options.prefectureName),
+    [defaultAtts.cityName]: formData.get(options.cityName),
+    [defaultAtts.cityCodeName]: formData.get(options.cityCodeName),
+    [defaultAtts.smallAreaName]: formData.get(options.smallAreaName),
+    [defaultAtts.otherAddressName]: formData.get(options.otherAddressName),
+    [defaultAtts.isSmallAreaExceptionName]: formData.get(
+      options.isSmallAreaExceptionName
+    ),
+    lat,
+    lng,
+  });
 
-  newFormData.set(
-    defaultAtts.smallAreaName,
-    formData.get(options.smallAreaName)
-  );
-  newFormData.set(
-    defaultAtts.otherAddressName,
-    formData.get(options.otherAddressName)
-  );
-  newFormData.set(
-    defaultAtts.isSmallAreaExceptionName,
-    formData.get(options.isSmallAreaExceptionName)
-  );
-  newFormData.set("lat", lat.toString());
-  newFormData.set("lng", lng.toString());
-
-  fetch(geoloniaEndpoint, { method: "POST", body: newFormData });
+  return fetch(geoloniaEndpoint, { method: "POST", body });
 };

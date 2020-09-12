@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "start": "webpack-dev-server",
-    "build": "webpack",
+    "build": "webpack -p",
     "test": "jest"
   },
   "repository": {
@@ -23,8 +23,11 @@
   "devDependencies": {
     "@types/html-webpack-plugin": "^3.2.3",
     "@types/jest": "^26.0.13",
+    "@types/jsdom": "^16.2.4",
+    "@types/url-parse": "^1.4.3",
     "html-webpack-plugin": "^4.3.0",
     "jest": "^26.4.2",
+    "jsdom": "^16.4.0",
     "node-sass": "^4.14.1",
     "ts-jest": "^26.3.0",
     "ts-loader": "^8.0.3",
@@ -33,5 +36,8 @@
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "querystring": "^0.2.0",
+    "url-parse": "^1.4.7"
+  }
 }

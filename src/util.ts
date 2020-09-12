@@ -1,6 +1,9 @@
+import urlParse from "url-parse";
+import querystring from "querystring";
+
 export const defaultAtts: Geolonia.FormRenderOptions = {
   geolocationButtonLabel: "現在地から住所を入力",
-  geolocatingLabel: "ロード中...",
+  geolocatingLabel: "取得中...",
   prefectureLabel: "都道府県",
   cityLabel: "市区町村",
   smallAreaLabel: "大字町丁目",
@@ -57,4 +60,20 @@ export const identifyTarget = (targetIdentifier: HTMLElement | string) => {
     throw new Error("no target found.");
   }
   return target;
+};
+
+export const parseApiKey = () => {
+  const scripts = document.getElementsByTagName("script");
+  let key = "YOUR-API-KEY";
+
+  for (const script of scripts) {
+    const { query } = urlParse(script.src);
+    // const q = querystring.parse(query.replace(/^\?/, ""));
+
+    // if (q["geolonia-api-key"] && typeof q["geolonia-api-key"] === "string") {
+    //   key = q["geolonia-api-key"] || key;
+    //   break;
+    // }
+  }
+  return key;
 };

@@ -11,7 +11,12 @@ import {
   fetchReverseGeocode,
   sendToGeolonia,
 } from "./api";
-import { parseAtts, getCurrentPosition, identifyTarget } from "./util";
+import {
+  parseAtts,
+  parseApiKey,
+  getCurrentPosition,
+  identifyTarget,
+} from "./util";
 
 /**
  * render Forms
@@ -183,10 +188,9 @@ const main = async (targetIdentifier: HTMLElement | string) => {
         !Number.isNaN(lat) &&
         !Number.isNaN(lng)
       ) {
-        sendToGeolonia(
-          { formData: new FormData(event.target), lat, lng },
-          options
-        );
+        const formData = new FormData(event.target);
+        const apiKey = parseApiKey();
+        sendToGeolonia({ formData, lat, lng, apiKey }, options);
       }
     });
   }

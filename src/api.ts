@@ -49,10 +49,12 @@ export const sendToGeolonia = (
     formData,
     lat,
     lng,
+    apiKey,
   }: {
     formData: FormData;
     lat: number;
     lng: number;
+    apiKey: string;
   },
   options: Geolonia.FormRenderOptions
 ) => {
@@ -70,5 +72,11 @@ export const sendToGeolonia = (
     lng,
   });
 
-  return fetch(geoloniaEndpoint, { method: "POST", body });
+  return fetch(geoloniaEndpoint, {
+    method: "POST",
+    headers: {
+      "x-geolonia-api-key": apiKey,
+    },
+    body,
+  });
 };

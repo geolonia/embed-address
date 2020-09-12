@@ -1,5 +1,5 @@
 {
-  "name": "@geolonia/address-input",
+  "name": "@geolonia/embed-address",
   "version": "1.0.0",
   "description": "",
   "main": "docs/bundle.js",
@@ -11,15 +11,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/geolonia/prototype-address-input-support.git"
+    "url": "git+https://github.com/geolonia/embed-address.git"
   },
   "keywords": [],
   "author": "geolonia",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/geolonia/prototype-address-input-support/issues"
+    "url": "https://github.com/geolonia/embed-address/issues"
   },
-  "homepage": "https://github.com/geolonia/prototype-address-input-support#readme",
+  "homepage": "https://github.com/geolonia/embed-address#readme",
   "devDependencies": {
     "@types/html-webpack-plugin": "^3.2.3",
     "@types/jest": "^26.0.13",

@@ -1,6 +1,6 @@
 # 住所簡単入力 API
 
-![badge](https://github.com/geolonia/prototype-address-input-support/workflows/test/badge.svg)
+![badge](https://github.com/geolonia/embed-address/workflows/test/badge.svg)
 
 住所簡単入力 API は、プルダウンで簡単に住所を入力できるフォームパーツです。
 

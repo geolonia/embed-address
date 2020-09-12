@@ -25,6 +25,7 @@ import {
 const main = async (targetIdentifier: HTMLElement | string) => {
   const target = identifyTarget(targetIdentifier);
   const options = parseAtts(target);
+  const { apiKey, stage } = parseApiKey();
 
   // state for those select element
   let lat: number = NaN;
@@ -76,7 +77,7 @@ const main = async (targetIdentifier: HTMLElement | string) => {
       return;
     }
 
-    const data = await fetchReverseGeocode(lng, lat);
+    const data = await fetchReverseGeocode(lng, lat, stage);
     if (!data) {
       buttonGeolocation.innerText = options.geolocationButtonLabel;
       spanErrorMessage.innerText =
@@ -182,15 +183,21 @@ const main = async (targetIdentifier: HTMLElement | string) => {
 
   // send to Geolonia
   if (parentalForm) {
-    parentalForm.addEventListener("submit", (event) => {
-      if (
-        event.target instanceof HTMLFormElement &&
-        !Number.isNaN(lat) &&
-        !Number.isNaN(lng)
-      ) {
+    parentalForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (event.target instanceof HTMLFormElement) {
         const formData = new FormData(event.target);
-        const apiKey = parseApiKey();
-        sendToGeolonia({ formData, lat, lng, apiKey }, options);
+        if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+          try {
+            await sendToGeolonia(
+              { formData, lat, lng, apiKey, stage },
+              options
+            );
+          } catch (error) {
+            console.error(error);
+          }
+        }
+        event.target.submit();
       }
     });
   }

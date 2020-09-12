@@ -1,8 +1,7 @@
 import { defaultAtts } from "./util";
 
 const AddressAPIBase = "https://cdn.geolonia.com/address";
-const reverseGeocodeAPIBase = "https://api.geolonia.com/dev/reverseGeocode";
-const geoloniaEndpoint = "./"; // TODO: fix me
+const APIBase = "https://api.geolonia.com";
 
 const fetchAddresses = async <T>(path: string) => {
   try {
@@ -26,10 +25,10 @@ export const fetchCities = (prefCode: string) =>
 export const fetchSmallAreas = (prefCode: string, cityCode: string) =>
   fetchAddresses<Geolonia.API.SmallArea>(`japan/${prefCode}/${cityCode}.json`);
 
-export const fetchReverseGeocode = async (lng: number, lat: number) => {
+export const fetchReverseGeocode = async (lng: number, lat: number, stage: string) => {
   try {
     const data = await fetch(
-      `${reverseGeocodeAPIBase}?lng=${lng}&lat=${lat}`
+      `${APIBase}/${stage}/reverseGeocode?lng=${lng}&lat=${lat}`
     ).then((res) => {
       if (res.status > 299) {
         console.error(res);
@@ -50,11 +49,13 @@ export const sendToGeolonia = (
     lat,
     lng,
     apiKey,
+    stage
   }: {
     formData: FormData;
     lat: number;
     lng: number;
     apiKey: string;
+    stage: string
   },
   options: Geolonia.FormRenderOptions
 ) => {
@@ -67,16 +68,17 @@ export const sendToGeolonia = (
     [defaultAtts.otherAddressName]: formData.get(options.otherAddressName),
     [defaultAtts.isSmallAreaExceptionName]: formData.get(
       options.isSmallAreaExceptionName
-    ),
+    ) === 'true',
     lat,
     lng,
   });
 
-  return fetch(geoloniaEndpoint, {
+  return fetch(`${APIBase}/${stage}/geocode`, {
     method: "POST",
     headers: {
-      "x-geolonia-api-key": apiKey,
+      "X-Geolonia-Api-Key": apiKey,
     },
     body,
-  });
+  }).then(res => res.json());
 };
+

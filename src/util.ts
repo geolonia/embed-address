@@ -62,18 +62,30 @@ export const identifyTarget = (targetIdentifier: HTMLElement | string) => {
   return target;
 };
 
-export const parseApiKey = () => {
+export const parseApiKey = (document: Document = window.document) => {
   const scripts = document.getElementsByTagName("script");
-  let key = "YOUR-API-KEY";
+  const params = {
+    apiKey: "YOUR-API-KEY",
+    stage: "dev",
+  };
 
   for (const script of scripts) {
-    const { query } = urlParse(script.src);
-    // const q = querystring.parse(query.replace(/^\?/, ""));
+    const { pathname, query } = urlParse(script.src);
+    // NOTE: bug rulParse typping
+    const q = querystring.parse(
+      ((query as unknown) as string).replace(/^\?/, "")
+    );
 
-    // if (q["geolonia-api-key"] && typeof q["geolonia-api-key"] === "string") {
-    //   key = q["geolonia-api-key"] || key;
-    //   break;
-    // }
+    if (typeof q["geolonia-api-key"] === "string" && q["geolonia-api-key"]) {
+      params.apiKey = q["geolonia-api-key"];
+
+      const res = pathname.match(/^\/(v[0-9.]+)\/embed-address/);
+      if (res && res[1] !== "dev") {
+        params.stage = res[1];
+      }
+      break;
+    }
   }
-  return key;
+
+  return params;
 };
